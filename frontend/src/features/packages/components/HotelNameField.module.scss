@@ -1,0 +1,19 @@
+.wrapper {
+  position: relative;
+}
+
+.list {
+  position: absolute;
+  top: calc(100% - 1.25rem); // overlap the help text, sit right under the input
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  max-height: 20rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.option {
+  cursor: pointer;
+}

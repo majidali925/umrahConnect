@@ -29,9 +29,9 @@ const env = {
   port: Number(process.env.PORT) || 5000,
   mongoUri: process.env.MONGODB_URI,
   // Public marketplace frontend origin(s): allowed on every API route except /admin.
-  clientUrls: parseOrigins(process.env.CLIENT_URL, 'http://localhost:3000'),
+  clientUrls: parseOrigins(process.env.CLIENT_URL, 'http://localhost:8080'),
   // Admin panel origin(s): allowed on /admin routes only.
-  adminClientUrls: parseOrigins(process.env.ADMIN_CLIENT_URL, 'http://localhost:3001'),
+  adminClientUrls: parseOrigins(process.env.ADMIN_CLIENT_URL, 'http://localhost:8090'),
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
@@ -45,7 +45,7 @@ const env = {
     refreshExpiresIn: process.env.ADMIN_REFRESH_TOKEN_EXPIRES_IN || '12h',
   },
   cookie: {
-    // 'lax' works when frontend and backend share a site (e.g. localhost:3000 / localhost:5000).
+    // 'lax' works when frontend and backend share a site (e.g. localhost:8080 / localhost:5000).
     // Use 'none' (requires HTTPS) when they are deployed on different sites.
     sameSite: process.env.COOKIE_SAMESITE || 'lax',
     secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : nodeEnv === 'production',

@@ -1,11 +1,13 @@
 /**
  * Footprints of the two Harams, used to measure how far a hotel is from the mosque.
- * Distances are taken to the nearest edge of the footprint (not the centre), which matches
- * how hotels advertise "X m from the Haram".
+ * Distances are taken to the nearest edge of the footprint (not the centre), which is closer
+ * to how hotels advertise "X m from the Haram".
  *
- * Outlines are simplified OpenStreetMap geometry (© OpenStreetMap contributors, ODbL):
- * Masjid al-Haram = relation 1472531, Masjid an-Nabawi = way 461699097. Each ring is a list
- * of [lat, lng] points.
+ * Outlines are simplified OpenStreetMap geometry (© OpenStreetMap contributors, ODbL). Each
+ * ring is a list of [lat, lng] points.
+ *  - Makkah: the Masjid al-Haram building including its expansions (relation 1472531).
+ *  - Madinah: the fence around Masjid an-Nabawi's outer courtyard (way 623592432), since
+ *    Madinah hotels measure to the courtyard gates rather than the mosque building.
  */
 const HOLY_CITIES = Object.freeze({
   MAKKAH: 'MAKKAH',
@@ -27,7 +29,7 @@ const HARAMS = Object.freeze({
     name: 'Masjid an-Nabawi',
     searchBox: [39.56, 24.51, 39.66, 24.42],
     rings: [
-      [[24.468607, 39.609111], [24.467897, 39.609116], [24.467755, 39.609724], [24.467860, 39.610662], [24.467332, 39.610663], [24.467334, 39.611599], [24.467843, 39.611545], [24.467812, 39.613113], [24.468030, 39.613113], [24.468030, 39.613225], [24.468573, 39.613232], [24.468572, 39.613093], [24.469748, 39.613185], [24.469961, 39.612724], [24.469836, 39.610255], [24.469956, 39.610301], [24.469949, 39.609571], [24.469856, 39.609612], [24.469786, 39.609133], [24.469028, 39.609221], [24.468755, 39.609115], [24.468608, 39.609232], [24.468607, 39.609111]],
+      [[24.466064, 39.610641], [24.466047, 39.613051], [24.467803, 39.613038], [24.467799, 39.613184], [24.468195, 39.613470], [24.468196, 39.614177], [24.468277, 39.614328], [24.470982, 39.614337], [24.470981, 39.611435], [24.470733, 39.611435], [24.470735, 39.610918], [24.470972, 39.610921], [24.470979, 39.607862], [24.466080, 39.607836]],
     ],
   },
 });

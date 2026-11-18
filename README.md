@@ -7,8 +7,8 @@ The repository holds three independent applications:
 | Folder      | Stack                                                                                  | Default URL                    |
 | ----------- | -------------------------------------------------------------------------------------- | ------------------------------ |
 | `backend/`  | Node.js · Express 5 · MongoDB/Mongoose · JWT · bcrypt · Joi · Multer · Nodemailer      | http://localhost:5000/api/v1   |
-| `frontend/` | Public marketplace for pilgrims and vendors. Next.js 16 (App Router, JavaScript) · React 19 · SCSS modules · Reactstrap/Bootstrap · Redux Toolkit · Axios · Formik + Yup | http://localhost:3000 |
-| `admin/`    | Admin panel for platform administrators. Same stack as `frontend/`                     | http://localhost:3001          |
+| `frontend/` | Public marketplace for pilgrims and vendors. Next.js 16 (App Router, JavaScript) · React 19 · SCSS modules · Reactstrap/Bootstrap · Redux Toolkit · Axios · Formik + Yup | http://localhost:8080 |
+| `admin/`    | Admin panel for platform administrators. Same stack as `frontend/`                     | http://localhost:8090          |
 
 Neither frontend contains API logic, database access or business rules. They talk to the backend only over HTTP, and the backend is the source of truth for roles and permissions.
 
@@ -53,13 +53,14 @@ Edit `backend/.env`:
 | `ACCESS_TOKEN_EXPIRES_IN` / `REFRESH_TOKEN_EXPIRES_IN` | Default `15m` / `7d` |
 | `ADMIN_ACCESS_TOKEN_EXPIRES_IN` / `ADMIN_REFRESH_TOKEN_EXPIRES_IN` | Default `15m` / `12h` |
 | `CLIENT_URL` | Marketplace frontend origin(s), comma-separated. Allowed on every route except `/api/v1/admin` |
-| `ADMIN_CLIENT_URL` | Admin panel origin(s), comma-separated (default `http://localhost:3001`). Allowed on `/api/v1/admin` only |
+| `ADMIN_CLIENT_URL` | Admin panel origin(s), comma-separated (default `http://localhost:8090`). Allowed on `/api/v1/admin` only |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` | SMTP settings. **Leave `SMTP_HOST` empty in development** and emails (including OTP codes) are printed to the API console |
 | `ADMIN_NOTIFICATION_EMAIL` | Optional; notified when a vendor submits an application |
 | `COOKIE_SAMESITE`, `COOKIE_SECURE` | Refresh-cookie settings (see *Deployment notes*) |
 | `OTP_EXPIRES_IN_MINUTES`, `OTP_MAX_ATTEMPTS`, `OTP_RESEND_COOLDOWN_SECONDS` | OTP tuning (defaults 10 / 5 / 60) |
 | `UPLOAD_MAX_FILE_SIZE_MB` | Document upload limit (default 5) |
 | `AUTH_RATE_LIMIT_MAX` | Login/register/OTP attempts per IP per 15 min (default 20). Admin login gets half of this, minimum 5 |
+| `GEOCODER_URL`, `GEOCODER_USER_AGENT` | Optional. Hotel search on the package form, which fills in each hotel's distance from the Haram, uses OpenStreetMap Nominatim (default `https://nominatim.openstreetmap.org`). The public server allows one request per second and requires an identifying User-Agent, ideally with a contact URL. Point `GEOCODER_URL` at a self-hosted Nominatim for heavy use |
 
 ### Create the super admin
 
@@ -98,7 +99,7 @@ npm test         # integration tests (uses the umrah_connect_test database)
 cd frontend
 npm install
 cp .env.example .env.local      # NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-npm run dev                     # http://localhost:3000
+npm run dev                     # http://localhost:8080
 ```
 
 Production build:
@@ -114,10 +115,10 @@ npm start
 cd admin
 npm install
 cp .env.example .env.local      # NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-npm run dev                     # http://localhost:3001
+npm run dev                     # http://localhost:8090
 ```
 
-Sign in at http://localhost:3001/login with the super admin's email and password. Production: `npm run build && npm start` (port 3001).
+Sign in at http://localhost:8090/login with the super admin's email and password. Production: `npm run build && npm start` (port 8090).
 
 Run the three apps in separate terminals; none depends on another's process.
 
@@ -127,12 +128,12 @@ Run the three apps in separate terminals; none depends on another's process.
 
 1. Start MongoDB, the backend (`npm run dev`) and the frontend (`npm run dev`).
 2. Seed the super admin (see above).
-3. Open http://localhost:3000/register/vendor and register as a *Registered Travel Agency*.
+3. Open http://localhost:8080/register/vendor and register as a *Registered Travel Agency*.
 4. Copy the 6-digit code from the **backend console** (`[email:dev]`) into the verification page.
 5. Complete the 5-step onboarding wizard (PDF/JPG/PNG documents) and submit.
-6. Open the admin panel at http://localhost:3001 and sign in as the super admin. Go to **Agencies & operators**, open the application, view and approve each required document, then approve the agency. Or reject it with a reason and resubmit as the vendor.
+6. Open the admin panel at http://localhost:8090 and sign in as the super admin. Go to **Agencies & operators**, open the application, view and approve each required document, then approve the agency. Or reject it with a reason and resubmit as the vendor.
 7. Back as the vendor: the profile page now shows **Publishing enabled**, and **Packages** and **Seat requests** appear in the sidebar. Create a package for a future date and publish it.
-8. Register a customer account at http://localhost:3000/register, open **Packages**, pick the package and request seats.
+8. Register a customer account at http://localhost:8080/register, open **Packages**, pick the package and request seats.
 9. As the vendor, open **Seat requests** and confirm (or decline) the request. The customer sees the confirmation and the agency's contact details under **My seat requests**. No payment is involved.
 
 ---
@@ -176,7 +177,7 @@ umrah-connect/
 │   │   ├── styles/        Bootstrap theme variables + globals
 │   │   └── constants/
 │   └── .env.example
-├── admin/                 standalone admin panel (port 3001)
+├── admin/                 standalone admin panel (port 8090)
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── login/     admin sign-in

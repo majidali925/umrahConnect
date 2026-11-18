@@ -12,6 +12,8 @@ export const agencyPackageService = {
   update: (id, payload) => unwrap(apiClient.put(`/agencies/packages/${id}`, payload)),
   setStatus: (id, status) => unwrap(apiClient.patch(`/agencies/packages/${id}/status`, { status })),
   remove: (id) => unwrap(apiClient.delete(`/agencies/packages/${id}`)),
+  /** Hotels near the Haram of 'MAKKAH' or 'MADINAH', each with its distanceMeters from the mosque. */
+  searchHotels: (city, q) => unwrap(apiClient.get('/agencies/hotels/search', { params: { city, q } })),
 
   listQuotations: (params) => unwrap(apiClient.get('/agencies/quotations', { params: clean(params) })),
   confirmQuotation: (id, note) => unwrap(apiClient.patch(`/agencies/quotations/${id}/confirm`, { note })),

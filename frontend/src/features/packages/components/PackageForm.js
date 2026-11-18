@@ -2,10 +2,11 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { Formik, Form, useField } from 'formik';
+import { Formik, Form, useField, getIn } from 'formik';
 import { Card, CardBody, Row, Col, FormGroup, Input, Label, Button, Spinner } from 'reactstrap';
 import FormField from '@/components/forms/FormField';
 import FormAlert from '@/components/forms/FormAlert';
+import HotelNameField from './HotelNameField';
 import { packageSchema } from '@/utils/validation';
 import { applyServerErrors, getErrorMessage } from '@/utils/errors';
 import { formatCurrency, toDateInput, tomorrowInput } from '@/utils/format';
@@ -61,11 +62,24 @@ function InclusionCheckbox({ value, label }) {
   );
 }
 
-function HotelFields({ prefix, city }) {
+const HARAM_NAMES = { MAKKAH: 'Masjid al-Haram', MADINAH: 'Masjid an-Nabawi' };
+
+function HotelFields({ prefix, city, cityCode, values }) {
+  // The hotel picked from the suggestions, so the distance field can say it was auto-filled.
+  const [picked, setPicked] = useState(null);
+  const distance = getIn(values, `${prefix}.distanceMeters`);
+  const autoFilled = picked && Number(distance) === picked.distanceMeters;
+
   return (
     <Row className="g-3">
       <Col md={6}>
-        <FormField name={`${prefix}.name`} label={`${city} hotel`} placeholder="e.g. Hilton Suites" className="mb-0" />
+        <HotelNameField
+          prefix={prefix}
+          city={cityCode}
+          label={`${city} hotel`}
+          placeholder="e.g. Hilton Suites"
+          onPick={setPicked}
+        />
       </Col>
       <Col sm={4} md={2}>
         <FormField name={`${prefix}.stars`} label="Rating" type="select" options={STAR_OPTIONS} placeholder="—" className="mb-0" />
@@ -76,7 +90,7 @@ function HotelFields({ prefix, city }) {
           label="Distance (m)"
           type="number"
           min={0}
-          help="From the Haram"
+          help={autoFilled ? `Auto-filled: straight line to ${HARAM_NAMES[cityCode]}. Adjust if needed.` : 'From the Haram'}
           className="mb-0"
         />
       </Col>
@@ -177,9 +191,9 @@ export default function PackageForm({ initialPackage, bookedSeats = 0, onSubmit,
                   <h2 className="h6 section-title mb-0">Hotels</h2>
                   <span className="small text-secondary">{nights} night(s) in total</span>
                 </div>
-                <HotelFields prefix="makkahHotel" city="Makkah" />
+                <HotelFields prefix="makkahHotel" city="Makkah" cityCode="MAKKAH" values={values} />
                 <hr className="my-4" />
-                <HotelFields prefix="madinahHotel" city="Madinah" />
+                <HotelFields prefix="madinahHotel" city="Madinah" cityCode="MADINAH" values={values} />
               </CardBody>
             </Card>
 

@@ -125,8 +125,8 @@ describe('Admin authentication (separate from marketplace users)', () => {
   });
 
   it('applies separate CORS allow-lists to the admin and marketplace APIs', async () => {
-    const adminOrigin = 'http://localhost:3001';
-    const siteOrigin = 'http://localhost:3000';
+    const adminOrigin = 'http://localhost:8090';
+    const siteOrigin = 'http://localhost:8080';
     const adminFromAdmin = await h.api().options('/api/v1/admin/auth/login').set('Origin', adminOrigin);
     const adminFromSite = await h.api().options('/api/v1/admin/auth/login').set('Origin', siteOrigin);
     const siteFromSite = await h.api().options('/api/v1/auth/login').set('Origin', siteOrigin);
