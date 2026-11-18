@@ -1,0 +1,14 @@
+import SiteHeader from '@/components/layouts/SiteHeader';
+import SiteFooter from '@/components/layouts/SiteFooter';
+
+export const metadata = { title: 'Umrah packages' };
+
+export default function PackagesLayout({ children }) {
+  return (
+    <div className="d-flex flex-column min-vh-100">
+      <SiteHeader />
+      <main className="container py-5 flex-grow-1">{children}</main>
+      <SiteFooter />
+    </div>
+  );
+}

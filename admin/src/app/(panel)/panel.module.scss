@@ -1,0 +1,70 @@
+@import '../../styles/variables';
+
+.stat {
+  border-top: 3px solid $line;
+}
+
+.statAccent {
+  border-top-color: $brand-gold;
+}
+
+.statValue {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: $ink;
+  line-height: 1.2;
+  margin: 0.25rem 0;
+}
+
+.statusBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.statusRow {
+  display: grid;
+  grid-template-columns: 130px 1fr 32px;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+
+  &:hover .bar {
+    background: darken($surface, 4%);
+  }
+}
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: $surface;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    min-width: 2px;
+  }
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.75rem;
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.docRow {
+  border: 1px solid $line;
+  border-radius: $border-radius-lg;
+  padding: 0.9rem 1rem;
+
+  & + & {
+    margin-top: 0.75rem;
+  }
+}

@@ -1,0 +1,94 @@
+@import '../../styles/variables';
+
+.steps {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.75rem;
+  counter-reset: step;
+}
+
+.step {
+  flex: 1;
+  position: relative;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 17px;
+    left: calc(50% + 22px);
+    right: calc(-50% + 22px);
+    height: 2px;
+    background: $line;
+  }
+}
+
+.done:not(:last-child)::after {
+  background: $brand-green;
+}
+
+.button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: $muted;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:not(:disabled):hover .circle {
+    border-color: $brand-green;
+  }
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 2px solid $line;
+  background: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+
+  @media (max-width: 575.98px) {
+    display: none;
+  }
+}
+
+.current {
+  .circle {
+    border-color: $brand-green;
+    color: $brand-green;
+    box-shadow: 0 0 0 4px rgba($brand-green, 0.12);
+  }
+
+  .label {
+    color: $ink;
+
+    @media (max-width: 575.98px) {
+      display: block;
+    }
+  }
+}
+
+.done .circle {
+  background: $brand-green;
+  border-color: $brand-green;
+  color: #fff;
+}

@@ -1,0 +1,67 @@
+@import '../../styles/variables';
+
+.successIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  background: $brand-green;
+  box-shadow: 0 0 0 8px $brand-green-light;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    position: relative;
+    padding: 0 0 1.5rem 2.5rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid $line;
+      background: #fff;
+    }
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 26px;
+      bottom: 2px;
+      width: 2px;
+      background: $line;
+    }
+  }
+
+  .done::before {
+    background: $brand-green;
+    border-color: $brand-green;
+  }
+
+  .done:not(:last-child)::after {
+    background: $brand-green;
+  }
+
+  .active::before {
+    border-color: $brand-gold;
+    box-shadow: 0 0 0 4px rgba($brand-gold, 0.2);
+  }
+}
+
+.publishCard {
+  border: 1px solid rgba($brand-gold, 0.45);
+  background: linear-gradient(135deg, #fff 0%, $brand-gold-light 100%);
+}

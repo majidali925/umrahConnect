@@ -1,0 +1,115 @@
+@import 'variables';
+@import 'bootstrap/scss/bootstrap';
+
+:root {
+  --uc-green: #{$brand-green};
+  --uc-green-dark: #{$brand-green-dark};
+  --uc-green-light: #{$brand-green-light};
+  --uc-gold: #{$brand-gold};
+  --uc-gold-light: #{$brand-gold-light};
+  --uc-surface: #{$surface};
+  --uc-line: #{$line};
+  --uc-muted: #{$muted};
+  --uc-header-height: #{$header-height};
+  --uc-sidebar-width: #{$sidebar-width};
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.01em;
+}
+
+a {
+  text-decoration: none;
+}
+
+.text-gold {
+  color: $brand-gold !important;
+}
+
+.bg-surface {
+  background-color: $surface !important;
+}
+
+.bg-green-light {
+  background-color: $brand-green-light !important;
+}
+
+.btn-gold {
+  @include button-variant($brand-gold, $brand-gold, $color: #fff, $hover-background: darken($brand-gold, 6%), $hover-border: darken($brand-gold, 6%), $hover-color: #fff);
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+}
+
+.card {
+  box-shadow: $box-shadow-sm;
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+}
+
+textarea.form-control {
+  min-height: 110px;
+}
+
+.form-text {
+  font-size: 0.8rem;
+}
+
+.table > thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: $muted;
+  background: $surface;
+  border-bottom-width: 1px;
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.badge-soft {
+  font-weight: 600;
+}
+
+@each $name, $color in ('primary': $primary, 'success': $success, 'info': $info, 'warning': $warning, 'danger': $danger, 'secondary': $secondary, 'dark': $dark) {
+  .badge-soft-#{$name} {
+    color: darken($color, 8%);
+    background-color: rgba($color, 0.12);
+    border: 1px solid rgba($color, 0.25);
+  }
+}
+
+.section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $brand-gold;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment files (never commit real credentials)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts
+admin/.next/
+admin/out/
+admin/next-env.d.ts
+*.tsbuildinfo
+
+# Uploaded verification documents (private user data)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+coverage/

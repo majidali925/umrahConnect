@@ -1,0 +1,44 @@
+@import '../../../styles/variables';
+
+.item {
+  border: 1px solid $line;
+  border-radius: $border-radius-lg;
+  padding: 1rem 1.1rem;
+  background: #fff;
+
+  & + & {
+    margin-top: 0.75rem;
+  }
+}
+
+.rejected {
+  border-color: rgba($danger, 0.45);
+  background: rgba($danger, 0.03);
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: $border-radius;
+  background: $surface;
+
+  @media (max-width: 575.98px) {
+    flex-wrap: wrap;
+  }
+}
+
+.fileIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: $brand-green;
+  background: $brand-green-light;
+}

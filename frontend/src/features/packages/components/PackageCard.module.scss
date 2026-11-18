@@ -1,0 +1,46 @@
+@import '../../../styles/variables';
+
+.card {
+  height: 100%;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 10px 28px rgba($ink, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.dates {
+  background: $brand-green-light;
+  color: $brand-green-dark;
+  border-radius: $border-radius;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.price {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: $brand-green;
+  line-height: 1.2;
+}
+
+.stars {
+  color: $brand-gold;
+  letter-spacing: 1px;
+}
+
+.seatBar {
+  height: 6px;
+  border-radius: 3px;
+  background: $line;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: $brand-gold;
+  }
+}

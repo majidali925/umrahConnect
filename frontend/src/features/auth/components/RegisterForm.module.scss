@@ -1,0 +1,31 @@
+@import '../../../styles/variables';
+
+.switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $border-radius-lg;
+
+  a {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: $border-radius;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: $muted;
+
+    &:hover {
+      color: $brand-green;
+    }
+  }
+
+  .active {
+    background: #fff;
+    color: $brand-green;
+    box-shadow: $box-shadow-sm;
+  }
+}

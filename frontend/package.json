@@ -1,0 +1,31 @@
+{
+  "name": "umrah-connect-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.14.0",
+    "axios": "^1.21.1",
+    "bootstrap": "^5.3.9",
+    "formik": "^2.4.9",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-redux": "^9.3.1",
+    "reactstrap": "^9.2.3",
+    "sass": "^1.108.2",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

@@ -1,0 +1,58 @@
+@import '../../styles/variables';
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: $brand-green;
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+
+  &:hover {
+    color: $brand-green-dark;
+  }
+}
+
+.mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.word {
+  font-size: 1.3rem;
+  color: $ink;
+}
+
+.accent {
+  color: $brand-green;
+}
+
+.light {
+  color: #fff;
+
+  .mark rect:first-child {
+    fill: rgba(255, 255, 255, 0.14);
+  }
+
+  .word,
+  .accent {
+    color: #fff;
+  }
+
+  .accent {
+    color: $brand-gold;
+  }
+}
+
+.sm {
+  .mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .word {
+    font-size: 1.1rem;
+  }
+}

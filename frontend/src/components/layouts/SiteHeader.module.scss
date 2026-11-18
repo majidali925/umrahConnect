@@ -1,0 +1,19 @@
+@import '../../styles/variables';
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: saturate(160%) blur(8px);
+  border-bottom: 1px solid $line;
+
+  :global(.nav-link) {
+    color: $ink;
+    font-weight: 500;
+
+    &:hover {
+      color: $brand-green;
+    }
+  }
+}

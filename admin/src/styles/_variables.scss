@@ -1,0 +1,68 @@
+// Brand palette
+$brand-green: #0b5d3b;
+$brand-green-dark: #07452b;
+$brand-green-light: #e8f3ed;
+$brand-gold: #c9a227;
+$brand-gold-light: #f8f1dc;
+$ink: #1c2a23;
+$muted: #5f6f66;
+$surface: #f6f8f7;
+$line: #e2e8e4;
+
+// Bootstrap overrides
+$primary: $brand-green;
+$success: #198754;
+$info: #0e7490;
+$warning: #d99a06;
+$danger: #c0392b;
+$dark: #23302a;
+
+$body-color: $ink;
+$body-bg: #ffffff;
+$secondary-color: $muted;
+$border-color: $line;
+$link-color: $brand-green;
+$link-hover-color: $brand-green-dark;
+
+$font-family-sans-serif: var(--font-body), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$headings-font-family: var(--font-heading), var(--font-body), system-ui, sans-serif;
+$headings-font-weight: 700;
+$headings-color: $ink;
+
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+
+$input-border-color: #ccd6d0;
+$input-focus-border-color: mix($brand-green, #ffffff, 60%);
+$input-btn-focus-color: rgba($brand-green, 0.2);
+$input-placeholder-color: #9aa8a0;
+$form-label-font-weight: 600;
+$form-label-font-size: 0.9rem;
+
+$btn-font-weight: 600;
+$btn-padding-y: 0.55rem;
+$btn-padding-x: 1.1rem;
+
+$card-border-color: $line;
+$card-cap-bg: #ffffff;
+$card-spacer-y: 1.25rem;
+$card-spacer-x: 1.25rem;
+
+$box-shadow-sm: 0 1px 2px rgba(16, 40, 28, 0.06);
+$box-shadow: 0 6px 20px rgba(16, 40, 28, 0.08);
+
+$table-cell-padding-y: 0.75rem;
+$table-cell-padding-x: 0.75rem;
+$table-th-font-weight: 600;
+
+$badge-font-weight: 600;
+$badge-padding-y: 0.4em;
+$badge-padding-x: 0.7em;
+
+$modal-content-border-radius: $border-radius-lg;
+
+// Layout
+$sidebar-width: 260px;
+$header-height: 68px;

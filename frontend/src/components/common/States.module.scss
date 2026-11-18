@@ -1,0 +1,51 @@
+@import '../../styles/variables';
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  gap: 0.5rem;
+}
+
+.compact {
+  padding: 1.25rem;
+}
+
+.fullPage {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: $brand-green-light;
+  color: $brand-green;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.error {
+  background: rgba($danger, 0.1);
+  color: $danger;
+}
+
+.title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.text {
+  color: $muted;
+  margin: 0;
+  max-width: 440px;
+}
