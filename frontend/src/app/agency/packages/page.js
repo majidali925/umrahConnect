@@ -13,7 +13,7 @@ import { agencyPackageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { useUrlParams } from '@/hooks/useUrlParams';
 import { PACKAGE_STATUS_META } from '@/constants';
-import { formatCurrency, formatDateRange } from '@/utils/format';
+import { formatCurrency, formatDate } from '@/utils/format';
 
 const FILTERS = [
   { value: '', label: 'All packages' },
@@ -129,7 +129,7 @@ function PackageList() {
                   const pendingCount = p.quotationCounts?.PENDING || 0;
                   return (
                     <tr key={p._id}>
-                      <td className="min-w-0 cell-title">
+                      <td className="cell-title" style={{ minWidth: '10rem' }}>
                         <Link href={`/agency/packages/${p._id}/edit`} className="fw-semibold">
                           {p.title}
                         </Link>
@@ -137,7 +137,11 @@ function PackageList() {
                           From {p.departureCity} · {p.durationDays} days
                         </div>
                       </td>
-                      <td className="small text-nowrap" data-label="Travel dates">{formatDateRange(p.departureDate, p.returnDate)}</td>
+                      <td className="small text-nowrap" data-label="Travel dates">
+                        {/* Two lines on desktop keep the actions column in view. */}
+                        <div>{formatDate(p.departureDate)}</div>
+                        <div className="text-secondary">→ {formatDate(p.returnDate)}</div>
+                      </td>
                       <td className="small text-nowrap" data-label="Price / person">{formatCurrency(p.pricePerPerson)}</td>
                       <td className="small text-nowrap" data-label="Seats booked">
                         <div>

@@ -68,10 +68,12 @@ function Comparison() {
   const ids = [...new Set(fromUrl)].slice(0, MAX_COMPARE);
   const key = ids.join(',');
 
-  const { data: results, loading } = useFetch(
-    async () => ({ data: await Promise.allSettled(ids.map((id) => packageService.get(id).then((r) => r.data))) }),
-    [key],
-  );
+  // Results are kept per id: after a column is removed the previous results still cover every
+  // remaining id, so the table updates at once and each column stays paired with its own package.
+  const { data: results } = useFetch(async () => {
+    const settled = await Promise.allSettled(ids.map((id) => packageService.get(id).then((r) => r.data)));
+    return { data: Object.fromEntries(ids.map((id, i) => [id, settled[i]])) };
+  }, [key]);
 
   const removeColumn = (id) => {
     remove(id);
@@ -98,10 +100,10 @@ function Comparison() {
     );
   }
 
-  if (loading && !results) return <LoadingState label="Loading packages…" />;
+  if (!results || ids.some((id) => !results[id])) return <LoadingState label="Loading packages…" />;
 
   // null marks a package that is no longer available (unpublished, departed, or removed).
-  const packages = (results || []).map((r) => (r.status === 'fulfilled' ? r.value : null));
+  const packages = ids.map((id) => (results[id].status === 'fulfilled' ? results[id].value : null));
   const cols = packages.length;
   const cells = (render) =>
     packages.map((p, i) =>
