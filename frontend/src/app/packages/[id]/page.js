@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Card, CardBody, Row, Col } from 'reactstrap';
@@ -29,6 +29,15 @@ function HotelCard({ city, hotel }) {
 function PackageDetail() {
   const { id } = useParams();
   const { data: pkg, loading, error, reload } = useFetch(() => packageService.get(id), [id]);
+  // The mobile booking bar hides while the booking card itself is on screen.
+  const [bookCard, setBookCard] = useState(null);
+  const [bookCardVisible, setBookCardVisible] = useState(false);
+  useEffect(() => {
+    if (!bookCard) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setBookCardVisible(entry.isIntersecting), { threshold: 0.25 });
+    observer.observe(bookCard);
+    return () => observer.disconnect();
+  }, [bookCard]);
 
   if (loading && !pkg) return <LoadingState label="Loading package…" />;
   if (error) {
@@ -45,7 +54,7 @@ function PackageDetail() {
   const agency = pkg.agency;
 
   return (
-    <>
+    <div className="has-mobile-cta">
       <Link href="/packages" className="small d-inline-block mb-3">
         ← All packages
       </Link>
@@ -130,7 +139,7 @@ function PackageDetail() {
         </Col>
 
         <Col lg={4}>
-          <Card className="position-sticky" style={{ top: 88 }}>
+          <Card id="book" innerRef={setBookCard} className="position-sticky" style={{ top: 88, scrollMarginTop: 88 }}>
             <CardBody className="p-4">
               <div className="h3 mb-0 text-primary">{formatCurrency(pkg.pricePerPerson)}</div>
               <div className="small text-secondary mb-3">per person · {ROOM_TYPE_LABELS[pkg.roomType]}</div>
@@ -142,7 +151,18 @@ function PackageDetail() {
           </Card>
         </Col>
       </Row>
-    </>
+
+      {/* Phones and tablets: the booking card sits at the bottom of the page, so keep a shortcut in reach. */}
+      <div className={`mobile-cta ${bookCardVisible ? 'd-none' : ''}`}>
+        <div className="lh-sm">
+          <div className="fw-bold text-primary">{formatCurrency(pkg.pricePerPerson)}</div>
+          <div className="small text-secondary">per person</div>
+        </div>
+        <a href="#book" className="btn btn-primary px-4">
+          {pkg.availableSeats > 0 ? 'Request seats' : 'Fully booked'}
+        </a>
+      </div>
+    </div>
   );
 }
 

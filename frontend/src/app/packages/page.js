@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
-import { Card, CardBody, Input, Row, Col, Label } from 'reactstrap';
+import { Suspense, useState } from 'react';
+import { Card, CardBody, Input, Row, Col, Label, Button } from 'reactstrap';
 import PageHeader from '@/components/common/PageHeader';
 import Pagination from '@/components/common/Pagination';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
@@ -29,6 +29,10 @@ function PackageBrowser() {
     maxPrice: get('maxPrice'),
     sort: get('sort') || 'departure',
   };
+  // On phones the filters (other than search) fold away behind a button.
+  const [showFilters, setShowFilters] = useState(false);
+  const activeFilters = [filters.departureCity, filters.from, filters.maxPrice].filter(Boolean).length;
+  const filterCol = showFilters ? '' : 'd-none d-md-block';
 
   const { data: cities } = useFetch(() => packageService.departureCities(), []);
   const { data, meta, loading, error, reload } = useFetch(
@@ -51,15 +55,27 @@ function PackageBrowser() {
               <Label for="pkg-search" className="small">
                 Search
               </Label>
-              <Input
-                id="pkg-search"
-                type="search"
-                placeholder="Package, hotel or city…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div className="d-flex gap-2">
+                <Input
+                  id="pkg-search"
+                  type="search"
+                  placeholder="Package, hotel or city…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <Button
+                  color={activeFilters ? 'primary' : 'light'}
+                  outline={Boolean(activeFilters)}
+                  className="d-md-none border text-nowrap"
+                  aria-expanded={showFilters}
+                  aria-controls="pkg-filters"
+                  onClick={() => setShowFilters((v) => !v)}
+                >
+                  Filters{activeFilters ? ` (${activeFilters})` : ''}
+                </Button>
+              </div>
             </Col>
-            <Col sm={6} md={2}>
+            <Col sm={6} md={2} className={filterCol} id="pkg-filters">
               <Label for="pkg-city" className="small">
                 Departing from
               </Label>
@@ -72,13 +88,13 @@ function PackageBrowser() {
                 ))}
               </Input>
             </Col>
-            <Col sm={6} md={2}>
+            <Col sm={6} md={2} className={filterCol}>
               <Label for="pkg-from" className="small">
                 Departing after
               </Label>
               <Input id="pkg-from" type="date" value={filters.from} onChange={(e) => setParams({ from: e.target.value })} />
             </Col>
-            <Col sm={6} md={2}>
+            <Col sm={6} md={2} className={filterCol}>
               <Label for="pkg-price" className="small">
                 Max price / person
               </Label>
@@ -91,7 +107,7 @@ function PackageBrowser() {
                 ))}
               </Input>
             </Col>
-            <Col sm={6} md={2}>
+            <Col sm={6} md={2} className={filterCol}>
               <Label for="pkg-sort" className="small">
                 Sort by
               </Label>

@@ -53,14 +53,17 @@ export default function DashboardShell({ navItems, areaLabel, children }) {
           <Button color="light" className={`border ${styles.menuButton}`} onClick={() => setMenuOpen(true)} aria-label="Open menu">
             ☰
           </Button>
-          <div className="ms-auto d-flex align-items-center gap-3">
+          <div className="d-lg-none">
+            <BrandLogo size="sm" href="/dashboard" />
+          </div>
+          <div className="ms-auto d-flex align-items-center gap-2 gap-sm-3">
             <div className="text-end d-none d-sm-block lh-sm">
               <div className="fw-semibold small">{user?.fullName}</div>
               <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
                 {user?.email}
               </div>
             </div>
-            <div className={styles.avatar} aria-hidden="true">
+            <div className={`${styles.avatar} d-none d-sm-grid`} aria-hidden="true">
               {initials(user?.fullName)}
             </div>
             <Button color="light" size="sm" className="border" onClick={logout}>

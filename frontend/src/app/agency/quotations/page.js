@@ -163,7 +163,7 @@ function QuotationList() {
         </Alert>
       )}
 
-      <Nav tabs className="mb-3">
+      <Nav tabs className="mb-3 nav-scroll">
         {TABS.map((tab) => (
           <NavItem key={tab}>
             <NavLink

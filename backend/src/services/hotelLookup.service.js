@@ -78,10 +78,14 @@ async function queryNominatim(haram, q) {
       headers: { 'User-Agent': env.geocoder.userAgent, Accept: 'application/json' },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-  } catch {
+  } catch (err) {
+    console.warn(`[hotel-lookup] geocoder request failed: ${err.name}`);
     throw unavailable();
   }
-  if (!res.ok) throw unavailable();
+  if (!res.ok) {
+    console.warn(`[hotel-lookup] geocoder responded ${res.status}`);
+    throw unavailable();
+  }
   const body = await res.json().catch(() => null);
   if (!Array.isArray(body)) throw unavailable();
   return body;

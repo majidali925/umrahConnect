@@ -74,7 +74,7 @@ function AgencyList() {
           <EmptyState title="No vendors found" message="Try changing the filters or search terms." />
         ) : (
           <div className="table-responsive" style={{ opacity: loading ? 0.6 : 1 }}>
-            <Table hover className="mb-0">
+            <Table hover className="mb-0 table-stack">
               <thead>
                 <tr>
                   <th>Business</th>
@@ -88,19 +88,21 @@ function AgencyList() {
               <tbody>
                 {data.map((a) => (
                   <tr key={a._id} className="cursor-pointer" onClick={() => router.push(`/agencies/${a._id}`)}>
-                    <td>
+                    <td className="cell-title">
                       <Link href={`/agencies/${a._id}`} className="fw-semibold" onClick={(e) => e.stopPropagation()}>
                         {a.businessName || <span className="text-secondary fst-italic">Not provided yet</span>}
                       </Link>
                     </td>
-                    <td className="small">{VENDOR_TYPE_LABELS[a.vendorType]}</td>
-                    <td className="small">
-                      {a.userId?.fullName}
-                      <div className="text-secondary">{a.userId?.email}</div>
+                    <td className="small" data-label="Type">{VENDOR_TYPE_LABELS[a.vendorType]}</td>
+                    <td className="small" data-label="Account owner">
+                      <div className="min-w-0 text-break">
+                        {a.userId?.fullName}
+                        <div className="text-secondary">{a.userId?.email}</div>
+                      </div>
                     </td>
-                    <td className="small">{a.city || '—'}</td>
-                    <td className="small">{formatDate(a.submittedAt)}</td>
-                    <td>
+                    <td className="small" data-label="City">{a.city || '—'}</td>
+                    <td className="small" data-label="Submitted">{formatDate(a.submittedAt)}</td>
+                    <td data-label="Status">
                       <StatusBadge status={a.verificationStatus} />
                     </td>
                   </tr>

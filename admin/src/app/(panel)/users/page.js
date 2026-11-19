@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
           <EmptyState title="No users found" message="Try different filters." />
         ) : (
           <div className="table-responsive" style={{ opacity: loading ? 0.6 : 1 }}>
-            <Table className="mb-0">
+            <Table className="mb-0 table-stack">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -77,25 +77,27 @@ export default function AdminUsersPage() {
               <tbody>
                 {data.map((u) => (
                   <tr key={u._id}>
-                    <td className="fw-semibold">{u.fullName}</td>
-                    <td className="small">
-                      {u.email}
-                      <div className="text-secondary">{formatPhone(u.phone)}</div>
+                    <td className="fw-semibold cell-title">{u.fullName}</td>
+                    <td className="small" data-label="Contact">
+                      <div className="min-w-0 text-break">
+                        {u.email}
+                        <div className="text-secondary">{formatPhone(u.phone)}</div>
+                      </div>
                     </td>
-                    <td>
+                    <td data-label="Role">
                       <span className="badge rounded-pill badge-soft badge-soft-primary">{ROLE_LABELS[u.role]}</span>
                     </td>
-                    <td className="small">
+                    <td className="small" data-label="Verified">
                       {[u.isEmailVerified && 'Email', u.isPhoneVerified && 'Mobile'].filter(Boolean).join(', ') || (
                         <span className="text-warning">Unverified</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className={`badge rounded-pill badge-soft ${u.isActive ? 'badge-soft-success' : 'badge-soft-secondary'}`}>
                         {u.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="small">{formatDate(u.createdAt)}</td>
+                    <td className="small" data-label="Joined">{formatDate(u.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

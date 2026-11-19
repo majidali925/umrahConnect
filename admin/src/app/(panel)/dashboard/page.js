@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
                 <EmptyState title="All caught up" message="No applications are waiting for review." />
               ) : (
                 <div className="table-responsive">
-                  <Table className="mb-0" hover>
+                  <Table className="mb-0 table-stack" hover>
                     <thead>
                       <tr>
                         <th>Business</th>
@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
                     <tbody>
                       {recentApplications.map((a) => (
                         <tr key={a._id}>
-                          <td>
+                          <td className="cell-title">
                             <Link href={`/agencies/${a._id}`} className="fw-semibold">
                               {a.businessName}
                             </Link>
@@ -84,8 +84,8 @@ export default function AdminDashboardPage() {
                               {VENDOR_TYPE_LABELS[a.vendorType]} · {a.city}
                             </div>
                           </td>
-                          <td className="small">{formatDate(a.submittedAt)}</td>
-                          <td>
+                          <td className="small" data-label="Submitted">{formatDate(a.submittedAt)}</td>
+                          <td data-label="Status">
                             <StatusBadge status={a.verificationStatus} />
                           </td>
                         </tr>

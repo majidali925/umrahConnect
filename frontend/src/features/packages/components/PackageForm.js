@@ -234,7 +234,7 @@ export default function PackageForm({ initialPackage, bookedSeats = 0, onSubmit,
               </CardBody>
             </Card>
 
-            <div className="d-flex flex-wrap justify-content-end gap-2">
+            <div className="action-bar">
               <Link href={cancelHref} className="btn btn-light border">
                 Cancel
               </Link>

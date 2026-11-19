@@ -113,3 +113,123 @@ textarea.form-control {
 .cursor-pointer {
   cursor: pointer;
 }
+
+/* ------------------------------------------------------------------ */
+/* Mobile helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+// Tabs that scroll sideways on small screens instead of wrapping onto several lines.
+.nav-scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    white-space: nowrap;
+  }
+}
+
+// Row of form/page buttons. On phones they stack full width, primary action on top
+// (so put the primary button last in the markup, as on desktop).
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  @include media-breakpoint-down(sm) {
+    flex-direction: column-reverse;
+
+    > .btn {
+      width: 100%;
+    }
+  }
+}
+
+// Data table that becomes one card per row on phones. Give each <td> a data-label
+// (shown as the field name); .cell-title spans the card, .cell-actions holds buttons.
+.table-stack {
+  @include media-breakpoint-down(md) {
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid $line;
+    }
+
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+
+    tbody td {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.3rem 0;
+      border: 0;
+      text-align: right;
+      white-space: normal;
+    }
+
+    tbody td[data-label]::before {
+      content: attr(data-label);
+      flex-shrink: 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: $muted;
+      text-align: left;
+    }
+
+    tbody td.cell-title {
+      display: block;
+      padding-bottom: 0.5rem;
+      text-align: left;
+    }
+
+    tbody td.cell-actions {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-top: 0.6rem;
+      text-align: left;
+
+      .btn {
+        margin: 0 !important;
+      }
+    }
+  }
+}
+
+// Leaves room at the bottom of the page for a fixed mobile action bar.
+.has-mobile-cta {
+  @include media-breakpoint-down(lg) {
+    padding-bottom: 5.5rem;
+  }
+}
+
+.mobile-cta {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 1015;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid $line;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+}

@@ -81,7 +81,7 @@ function PackageList() {
 
       <Card>
         <CardBody className="border-bottom py-3">
-          <ButtonGroup role="group" aria-label="Filter packages by status">
+          <ButtonGroup role="group" aria-label="Filter packages by status" className="flex-wrap">
             {FILTERS.map((f) => (
               <Button
                 key={f.value}
@@ -112,7 +112,7 @@ function PackageList() {
           />
         ) : (
           <div className="table-responsive" style={{ opacity: loading ? 0.6 : 1 }}>
-            <Table className="mb-0 align-middle">
+            <Table className="mb-0 align-middle table-stack">
               <thead>
                 <tr>
                   <th>Package</th>
@@ -129,7 +129,7 @@ function PackageList() {
                   const pendingCount = p.quotationCounts?.PENDING || 0;
                   return (
                     <tr key={p._id}>
-                      <td className="min-w-0">
+                      <td className="min-w-0 cell-title">
                         <Link href={`/agency/packages/${p._id}/edit`} className="fw-semibold">
                           {p.title}
                         </Link>
@@ -137,13 +137,15 @@ function PackageList() {
                           From {p.departureCity} · {p.durationDays} days
                         </div>
                       </td>
-                      <td className="small text-nowrap">{formatDateRange(p.departureDate, p.returnDate)}</td>
-                      <td className="small text-nowrap">{formatCurrency(p.pricePerPerson)}</td>
-                      <td className="small text-nowrap">
-                        <span className="fw-semibold">{p.bookedSeats}</span> / {p.totalSeats}
-                        {p.availableSeats === 0 && <div className="text-danger">Fully booked</div>}
+                      <td className="small text-nowrap" data-label="Travel dates">{formatDateRange(p.departureDate, p.returnDate)}</td>
+                      <td className="small text-nowrap" data-label="Price / person">{formatCurrency(p.pricePerPerson)}</td>
+                      <td className="small text-nowrap" data-label="Seats booked">
+                        <div>
+                          <span className="fw-semibold">{p.bookedSeats}</span> / {p.totalSeats}
+                          {p.availableSeats === 0 && <div className="text-danger">Fully booked</div>}
+                        </div>
                       </td>
-                      <td className="small">
+                      <td className="small" data-label="Requests">
                         <Link href={`/agency/quotations?packageId=${p._id}`}>
                           {pendingCount ? (
                             <span className="badge rounded-pill badge-soft badge-soft-warning">{pendingCount} pending</span>
@@ -152,10 +154,10 @@ function PackageList() {
                           )}
                         </Link>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <StatusBadge type="package" status={packageStatus(p)} />
                       </td>
-                      <td className="text-end text-nowrap">
+                      <td className="text-end text-nowrap cell-actions">
                         <Link href={`/agency/packages/${p._id}/edit`} className="btn btn-sm btn-light border me-1">
                           Edit
                         </Link>

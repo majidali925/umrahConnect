@@ -49,11 +49,11 @@ export default function PackageCard({ pkg }) {
         <ul className="list-unstyled small mb-3">
           <li className="mb-1">
             <span className="text-secondary">Makkah:</span> {pkg.makkahHotel.name} <Stars count={pkg.makkahHotel.stars} />{' '}
-            <span className="text-secondary">· {formatDistance(pkg.makkahHotel.distanceMeters)}</span>
+            <span className="text-secondary text-nowrap">· {formatDistance(pkg.makkahHotel.distanceMeters)}</span>
           </li>
           <li className="mb-1">
             <span className="text-secondary">Madinah:</span> {pkg.madinahHotel.name} <Stars count={pkg.madinahHotel.stars} />{' '}
-            <span className="text-secondary">· {formatDistance(pkg.madinahHotel.distanceMeters)}</span>
+            <span className="text-secondary text-nowrap">· {formatDistance(pkg.madinahHotel.distanceMeters)}</span>
           </li>
           <li>
             <span className="text-secondary">From:</span> {pkg.departureCity} · {ROOM_TYPE_LABELS[pkg.roomType]}
