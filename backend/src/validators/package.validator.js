@@ -90,6 +90,7 @@ const browsePackages = Joi.object({
   limit: Joi.number().integer().min(1).max(50).default(12),
   search: Joi.string().trim().max(100).allow(''),
   departureCity: Joi.string().trim().max(80).allow(''),
+  agencyId: objectId.allow('').label('Agency'),
   from: Joi.date(),
   to: Joi.date(),
   maxPrice: Joi.number().integer().min(1),

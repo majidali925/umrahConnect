@@ -155,6 +155,24 @@ describe('Packages and seat requests', () => {
       assert.equal(none.body.data.length, 0);
     });
 
+    it("filters by agency, showing only an approved agency's public packages", async () => {
+      const agencyId = (await Agency.findOne({ userId: vendor.session.user.id }))._id.toString();
+      const own = await h.api().get('/api/v1/packages').query({ agencyId });
+      assert.equal(own.status, 200);
+      assert.deepEqual(own.body.data.map((p) => p._id), [packageId]);
+
+      const otherId = (await Agency.findOne({ userId: otherVendor.session.user.id }))._id.toString();
+      const other = await h.api().get('/api/v1/packages').query({ agencyId: otherId });
+      assert.equal(other.body.data.length, 0);
+
+      const unapprovedId = (await Agency.findOne({ userId: draftVendor.session.user.id }))._id.toString();
+      const unapproved = await h.api().get('/api/v1/packages').query({ agencyId: unapprovedId });
+      assert.equal(unapproved.body.data.length, 0);
+
+      const bad = await h.api().get('/api/v1/packages').query({ agencyId: 'not-an-id' });
+      assert.equal(bad.status, 400);
+    });
+
     it('hides packages of suspended agencies', async () => {
       await Agency.updateOne({ userId: vendor.session.user.id }, { $set: { verificationStatus: 'SUSPENDED' } });
       const res = await h.api().get('/api/v1/packages');

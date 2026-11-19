@@ -224,6 +224,8 @@ async function browsePackages(query) {
     const regex = new RegExp(escapeRegex(query.search), 'i');
     filter.$or = [{ title: regex }, { departureCity: regex }, { 'makkahHotel.name': regex }, { 'madinahHotel.name': regex }];
   }
+  // One agency's packages; still limited to approved agencies by publicFilter.
+  if (query.agencyId) filter.agencyId.$in = filter.agencyId.$in.filter((id) => id.equals(query.agencyId));
   if (query.departureCity) filter.departureCity = new RegExp(`^${escapeRegex(query.departureCity)}$`, 'i');
   if (query.from) filter.departureDate.$gte = query.from;
   if (query.to) filter.departureDate.$lte = query.to;

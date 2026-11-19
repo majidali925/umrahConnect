@@ -29,6 +29,12 @@ function HotelCard({ city, hotel }) {
 function PackageDetail() {
   const { id } = useParams();
   const { data: pkg, loading, error, reload } = useFetch(() => packageService.get(id), [id]);
+  // How many packages this agency has listed, for the "more from this agency" link.
+  const agencyId = pkg?.agency?._id;
+  const { meta: agencyListing } = useFetch(
+    () => (agencyId ? packageService.browse({ agencyId, limit: 1 }) : Promise.resolve(null)),
+    [agencyId],
+  );
   // The mobile booking bar hides while the booking card itself is on screen.
   const [bookCard, setBookCard] = useState(null);
   const [bookCardVisible, setBookCardVisible] = useState(false);
@@ -52,6 +58,8 @@ function PackageDetail() {
   }
 
   const agency = pkg.agency;
+  const agencyHref = agency ? `/packages?agencyId=${agency._id}` : null;
+  const otherPackages = Math.max((agencyListing?.total || 0) - 1, 0);
 
   return (
     <div className="has-mobile-cta">
@@ -62,7 +70,14 @@ function PackageDetail() {
         <div className="section-title mb-1">{pkg.durationDays}-day Umrah package</div>
         <h1 className="h2 mb-1">{pkg.title}</h1>
         <p className="text-secondary mb-0">
-          by <span className="fw-semibold text-body">{agency?.businessName}</span>
+          by{' '}
+          {agency ? (
+            <Link href={agencyHref} className="fw-semibold">
+              {agency.businessName}
+            </Link>
+          ) : (
+            <span className="fw-semibold text-body">—</span>
+          )}
           <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified vendor</span>
         </p>
       </div>
@@ -133,6 +148,15 @@ function PackageDetail() {
                     { label: 'Verified since', value: formatDate(agency.verifiedSince) },
                   ]}
                 />
+                {otherPackages > 0 ? (
+                  <Link href={agencyHref} className="btn btn-outline-primary mt-3">
+                    View {otherPackages} more package{otherPackages > 1 ? 's' : ''} from {agency.businessName} →
+                  </Link>
+                ) : (
+                  agencyListing && (
+                    <p className="small text-secondary mt-3 mb-0">This is currently the only package from {agency.businessName}.</p>
+                  )
+                )}
               </CardBody>
             </Card>
           )}

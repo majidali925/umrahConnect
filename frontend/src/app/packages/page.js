@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { Card, CardBody, Input, Row, Col, Label, Button } from 'reactstrap';
+import { Card, CardBody, Input, Row, Col, Label, Button, Alert } from 'reactstrap';
 import PageHeader from '@/components/common/PageHeader';
 import Pagination from '@/components/common/Pagination';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
@@ -25,6 +25,7 @@ function PackageBrowser() {
   const filters = {
     search: get('search'),
     departureCity: get('departureCity'),
+    agencyId: get('agencyId'),
     from: get('from'),
     maxPrice: get('maxPrice'),
     sort: get('sort') || 'departure',
@@ -37,8 +38,9 @@ function PackageBrowser() {
   const { data: cities } = useFetch(() => packageService.departureCities(), []);
   const { data, meta, loading, error, reload } = useFetch(
     () => packageService.browse({ ...filters, page, limit: 12 }),
-    [page, filters.search, filters.departureCity, filters.from, filters.maxPrice, filters.sort],
+    [page, filters.search, filters.departureCity, filters.agencyId, filters.from, filters.maxPrice, filters.sort],
   );
+  const agencyName = filters.agencyId ? data?.[0]?.agency?.businessName || 'this agency' : null;
 
   return (
     <>
@@ -47,6 +49,17 @@ function PackageBrowser() {
         title="Find your Umrah package"
         subtitle="Upcoming packages from verified agencies. Request seats online — the agency confirms your booking directly."
       />
+
+      {filters.agencyId && (
+        <Alert color="success" fade={false} className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <span>
+            Showing packages from <strong>{agencyName}</strong>
+          </span>
+          <Button color="link" size="sm" className="p-0" onClick={() => setParams({ agencyId: '' })}>
+            Show all packages
+          </Button>
+        </Alert>
+      )}
 
       <Card className="mb-4">
         <CardBody>
@@ -131,7 +144,11 @@ function PackageBrowser() {
         <Card>
           <EmptyState
             title="No packages found"
-            message="Try different filters, or check back soon — verified agencies add new departures regularly."
+            message={
+              filters.agencyId
+                ? `${agencyName} has no packages matching these filters right now.`
+                : 'Try different filters, or check back soon — verified agencies add new departures regularly.'
+            }
           />
         </Card>
       ) : (
