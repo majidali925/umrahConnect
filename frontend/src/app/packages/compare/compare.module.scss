@@ -1,0 +1,167 @@
+@import '../../../styles/variables';
+
+// Desktop: a label column plus one column per package.
+// Phones: each label gets its own full-width line, with the package values side by side
+// underneath — so up to three packages fit a 360px screen without sideways scrolling.
+
+.table {
+  overflow: visible; // lets the header row stick while scrolling
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 13rem repeat(var(--cols), minmax(0, 1fr));
+  border-bottom: 1px solid $line;
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  }
+}
+
+.label {
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $muted;
+
+  @media (max-width: 767.98px) {
+    grid-column: 1 / -1;
+    padding: 0.6rem 0.75rem 0;
+    font-size: 0.75rem;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+.cell {
+  position: relative;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+  hyphens: auto;
+
+  @media (max-width: 767.98px) {
+    padding: 0.3rem 0.75rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  & + & {
+    border-left: 1px solid $line;
+  }
+}
+
+.best {
+  background: $brand-green-light;
+  font-weight: 700;
+  color: $brand-green-dark;
+
+  &::after {
+    content: 'Best';
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 1rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    background: $brand-green;
+  }
+}
+
+.section {
+  padding: 1rem 1rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $brand-gold;
+  background: $surface;
+  border-bottom: 1px solid $line;
+
+  @media (max-width: 767.98px) {
+    padding: 0.8rem 0.75rem 0.35rem;
+  }
+}
+
+.head {
+  position: sticky;
+  top: 68px; // below the site header
+  z-index: 5;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+  .cell {
+    padding-right: 2rem; // room for the remove button
+
+    @media (max-width: 767.98px) {
+      padding-right: 1.6rem;
+    }
+  }
+}
+
+.foot {
+  border-bottom: 0;
+
+  .cell {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+.remove {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: $muted;
+  font-size: 1.15rem;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: $ink;
+  }
+}
+
+.price {
+  margin-top: 0.25rem;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: $brand-green;
+
+  white-space: nowrap;
+
+  // On phones the price row directly below shows it; the header column is too narrow.
+  @media (max-width: 767.98px) {
+    display: none;
+  }
+}
+
+.clamp1,
+.clamp2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.clamp1 {
+  -webkit-line-clamp: 1;
+}
+
+.clamp2 {
+  -webkit-line-clamp: 3;
+  line-height: 1.3;
+
+  @media (min-width: 768px) {
+    -webkit-line-clamp: 2;
+  }
+}

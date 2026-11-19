@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Card, CardBody } from 'reactstrap';
+import CompareToggle from './CompareToggle';
 import { ROOM_TYPE_LABELS } from '@/constants';
 import { formatCurrency, formatDateRange, formatDistance } from '@/utils/format';
 import styles from './PackageCard.module.scss';
@@ -66,7 +67,10 @@ export default function PackageCard({ pkg }) {
               <div className={styles.price}>{formatCurrency(pkg.pricePerPerson)}</div>
               <div className="small text-secondary">per person</div>
             </div>
-            <span className="btn btn-sm btn-outline-primary">View details</span>
+            <div className="d-flex flex-column align-items-end gap-2">
+              <CompareToggle pkg={pkg} />
+              <span className="btn btn-sm btn-outline-primary">View details</span>
+            </div>
           </div>
         </div>
       </CardBody>

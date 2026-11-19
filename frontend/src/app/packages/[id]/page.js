@@ -8,6 +8,8 @@ import DetailList from '@/components/common/DetailList';
 import { LoadingState, ErrorState } from '@/components/common/States';
 import { SeatAvailability, Stars } from '@/features/packages/components/PackageCard';
 import SeatRequestForm from '@/features/packages/components/SeatRequestForm';
+import CompareToggle from '@/features/packages/components/CompareToggle';
+import { useCompare, compareHref } from '@/features/packages/compareStore';
 import { packageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { INCLUSION_OPTIONS, ROOM_TYPE_LABELS } from '@/constants';
@@ -29,6 +31,7 @@ function HotelCard({ city, hotel }) {
 function PackageDetail() {
   const { id } = useParams();
   const { data: pkg, loading, error, reload } = useFetch(() => packageService.get(id), [id]);
+  const { items: comparing } = useCompare();
   // How many packages this agency has listed, for the "more from this agency" link.
   const agencyId = pkg?.agency?._id;
   const { meta: agencyListing } = useFetch(
@@ -80,6 +83,21 @@ function PackageDetail() {
           )}
           <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified vendor</span>
         </p>
+        <div className="d-flex flex-wrap align-items-start gap-2 mt-3">
+          <CompareToggle pkg={pkg} />
+          {comparing.length >= 2 ? (
+            <Link href={compareHref(comparing.map((x) => x._id))} className="btn btn-sm btn-outline-primary">
+              Compare {comparing.length} packages →
+            </Link>
+          ) : (
+            comparing.length === 1 && (
+              <span className="small text-secondary align-self-center">
+                {comparing[0]._id === pkg._id ? 'Added. ' : ''}Pick one more package to compare —{' '}
+                <Link href="/packages">browse packages</Link>
+              </span>
+            )
+          )}
+        </div>
       </div>
 
       <Row className="g-4">

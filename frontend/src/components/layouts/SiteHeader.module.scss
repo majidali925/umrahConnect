@@ -17,3 +17,29 @@
     }
   }
 }
+
+.compare {
+  white-space: nowrap;
+
+  &:hover :global(.badge) {
+    background-color: #fff !important;
+    color: $brand-green !important;
+  }
+}
+
+// Very narrow phones (320px): shrink the logo so it, the compare link and the menu button
+// stay on one line.
+@media (max-width: 359.98px) {
+  .header :global(a[aria-label='UmrahConnect home']) {
+    gap: 0.4rem;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    span {
+      font-size: 1.1rem;
+    }
+  }
+}

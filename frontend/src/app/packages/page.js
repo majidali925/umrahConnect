@@ -6,6 +6,7 @@ import PageHeader from '@/components/common/PageHeader';
 import Pagination from '@/components/common/Pagination';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
 import PackageCard from '@/features/packages/components/PackageCard';
+import CompareTray from '@/features/packages/components/CompareTray';
 import { packageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { useUrlParams, useUrlSearch } from '@/hooks/useUrlParams';
@@ -163,6 +164,7 @@ function PackageBrowser() {
           <Pagination meta={meta} onChange={(p) => setParams({ page: String(p) })} />
         </div>
       )}
+      <CompareTray />
     </>
   );
 }
