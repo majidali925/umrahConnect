@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const env = require('./config/env');
 const routes = require('./routes');
+const { connectDatabase } = require('./config/database');
+const ApiError = require('./utils/ApiError');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -38,6 +40,20 @@ app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 app.use(cookieParser());
 if (!env.isTest) app.use(morgan(env.isProduction ? 'combined' : 'dev'));
+
+// Make sure the database is connected before any route runs (instant once connected).
+// Needed on Vercel, which serves this app without running server.js. The health check
+// connects on its own so it can report why a connection fails.
+app.use(async (req, _res, next) => {
+  if (req.path === '/api/v1/health') return next();
+  try {
+    await connectDatabase();
+    return next();
+  } catch (err) {
+    console.error('[db] Connection failed:', err.message);
+    return next(new ApiError(503, 'Service temporarily unavailable, please try again shortly', { code: 'DATABASE_UNAVAILABLE' }));
+  }
+});
 
 app.use('/api/v1/admin', require('./routes/admin.routes'));
 app.use('/api/v1', routes);

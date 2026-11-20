@@ -116,6 +116,26 @@ describe('Hotel search for packages', () => {
     assert.equal(res.body.code, 'HOTEL_LOOKUP_UNAVAILABLE');
   });
 
+  it('retries once when the connection drops before an answer', async () => {
+    let failures = 1;
+    reply = () => {
+      if (failures-- > 0) throw new TypeError('fetch failed', { cause: { code: 'UND_ERR_SOCKET' } });
+      return new Response(JSON.stringify(NOMINATIM_MADINAH), { status: 200 });
+    };
+    const res = await search(vendor.token, { city: 'MADINAH', q: 'taqwa' });
+    assert.equal(res.status, 200);
+    assert.equal(calls.length, 2);
+  });
+
+  it('gives up after a second network failure', async () => {
+    reply = () => {
+      throw new TypeError('fetch failed');
+    };
+    const res = await search(vendor.token, { city: 'MADINAH', q: 'taqwa' });
+    assert.equal(res.status, 503);
+    assert.equal(calls.length, 2);
+  });
+
   it('validates the query', async () => {
     assert.equal((await search(vendor.token, { city: 'JEDDAH', q: 'Hilton' })).status, 400);
     assert.equal((await search(vendor.token, { city: 'MAKKAH', q: 'ab' })).status, 400);
