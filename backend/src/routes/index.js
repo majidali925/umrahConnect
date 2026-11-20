@@ -4,9 +4,9 @@ const { sendSuccess } = require('../utils/apiResponse');
 
 const router = express.Router();
 
-router.get('/health', (_req, res) =>
+router.get('/', (_req, res) =>
   sendSuccess(res, {
-    message: 'UmrahConnect API is running',
+    message: 'API is running',
     data: { database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' },
   }),
 );
