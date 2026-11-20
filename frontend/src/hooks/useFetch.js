@@ -6,9 +6,17 @@ import { getErrorMessage } from '@/utils/errors';
 /**
  * Runs an async loader and tracks loading/error/data. Re-runs when `deps` change.
  * Responses from stale requests are ignored.
+ *
+ * `initialData` (e.g. rendered on the server) is shown straight away; the loader still
+ * runs once on mount to refresh it.
  */
-export function useFetch(loader, deps = []) {
-  const [state, setState] = useState({ data: null, meta: null, loading: true, error: null });
+export function useFetch(loader, deps = [], { initialData } = {}) {
+  const [state, setState] = useState(() => ({
+    data: initialData ?? null,
+    meta: null,
+    loading: initialData === undefined,
+    error: null,
+  }));
   const requestId = useRef(0);
 
   const run = useCallback(async () => {

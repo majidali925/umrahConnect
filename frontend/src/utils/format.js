@@ -1,7 +1,9 @@
 export function formatDate(value, withTime = false) {
   if (!value) return '—';
   const date = new Date(value);
+  // A fixed zone keeps server-rendered and browser-rendered dates identical.
   return date.toLocaleString('en-PK', {
+    timeZone: 'Asia/Karachi',
     day: 'numeric',
     month: 'short',
     year: 'numeric',

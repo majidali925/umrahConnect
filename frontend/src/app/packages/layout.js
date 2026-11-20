@@ -1,7 +1,15 @@
+import { baseOpenGraph } from '@/lib/site';
 import SiteHeader from '@/components/layouts/SiteHeader';
 import SiteFooter from '@/components/layouts/SiteFooter';
 
-export const metadata = { title: 'Umrah packages' };
+export const metadata = {
+  // Package pages pick up the site suffix too.
+  title: { default: 'Umrah packages from verified agencies', template: '%s · UmrahConnect' },
+  description:
+    'Browse Umrah packages from verified Pakistani travel agencies. Filter by departure city, dates and price, and compare hotels, distance to the Haram and inclusions.',
+  alternates: { canonical: '/packages' },
+  openGraph: { ...baseOpenGraph, url: '/packages', title: 'Umrah packages from verified agencies' },
+};
 
 export default function PackagesLayout({ children }) {
   return (

@@ -1,7 +1,35 @@
 import Link from 'next/link';
 import SiteHeader from '@/components/layouts/SiteHeader';
 import SiteFooter from '@/components/layouts/SiteFooter';
+import JsonLd from '@/components/seo/JsonLd';
+import { SITE_NAME, SITE_DESCRIPTION, absoluteUrl } from '@/lib/site';
 import styles from './page.module.scss';
+
+export const metadata = { alternates: { canonical: '/' } };
+
+// Tells search engines who runs the site and how to search it (sitelinks search box).
+const STRUCTURED_DATA = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: absoluteUrl('/'),
+    logo: absoluteUrl('/icon.svg'),
+    description: SITE_DESCRIPTION,
+    areaServed: { '@type': 'Country', name: 'Pakistan' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: absoluteUrl('/'),
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${absoluteUrl('/packages')}?search={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+];
 
 const STEPS = [
   { title: 'Create your account', text: 'Sign up with your email and Pakistani mobile number and verify it with a one-time code.' },
@@ -18,6 +46,7 @@ const VENDOR_POINTS = [
 export default function HomePage() {
   return (
     <div className="d-flex flex-column min-vh-100">
+      <JsonLd data={STRUCTURED_DATA} />
       <SiteHeader />
 
       <section className={styles.hero}>

@@ -60,6 +60,28 @@ function cacheSet(key, value) {
   cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
 }
 
+/**
+ * GET with one retry when the connection fails before any answer arrives. After an idle spell
+ * the pooled keep-alive connection is often already closed by the server, and the first
+ * request on it fails with a network error even though the service is up. Timeouts are not
+ * retried: the owner would wait twice as long for an answer that is not coming.
+ */
+async function fetchWithRetry(url, attempts = 2) {
+  for (let attempt = 1; ; attempt += 1) {
+    await takeTurn();
+    try {
+      return await fetch(url, {
+        headers: { 'User-Agent': env.geocoder.userAgent, Accept: 'application/json' },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+    } catch (err) {
+      const reason = err.cause?.code || err.cause?.message || err.message;
+      console.warn(`[hotel-lookup] geocoder request failed (attempt ${attempt}): ${err.name}: ${reason}`);
+      if (err.name === 'TimeoutError' || attempt >= attempts) throw unavailable();
+    }
+  }
+}
+
 async function queryNominatim(haram, q) {
   const url = new URL('/search', env.geocoder.url);
   url.search = new URLSearchParams({
@@ -71,17 +93,7 @@ async function queryNominatim(haram, q) {
     'accept-language': 'en',
   }).toString();
 
-  await takeTurn();
-  let res;
-  try {
-    res = await fetch(url, {
-      headers: { 'User-Agent': env.geocoder.userAgent, Accept: 'application/json' },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-  } catch (err) {
-    console.warn(`[hotel-lookup] geocoder request failed: ${err.name}`);
-    throw unavailable();
-  }
+  const res = await fetchWithRetry(url);
   if (!res.ok) {
     console.warn(`[hotel-lookup] geocoder responded ${res.status}`);
     throw unavailable();

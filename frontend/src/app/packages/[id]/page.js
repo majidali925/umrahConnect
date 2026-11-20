@@ -1,217 +1,101 @@
-'use client';
-
-import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { Card, CardBody, Row, Col } from 'reactstrap';
-import DetailList from '@/components/common/DetailList';
-import { LoadingState, ErrorState } from '@/components/common/States';
-import { SeatAvailability, Stars } from '@/features/packages/components/PackageCard';
-import SeatRequestForm from '@/features/packages/components/SeatRequestForm';
-import CompareToggle from '@/features/packages/components/CompareToggle';
-import { useCompare, compareHref } from '@/features/packages/compareStore';
-import { packageService } from '@/services/package.service';
-import { useFetch } from '@/hooks/useFetch';
-import { INCLUSION_OPTIONS, ROOM_TYPE_LABELS } from '@/constants';
+import { Suspense } from 'react';
+import { LoadingState } from '@/components/common/States';
+import JsonLd from '@/components/seo/JsonLd';
+import { getPublicPackage } from '@/lib/publicData';
+import { absoluteUrl, baseOpenGraph } from '@/lib/site';
+import { ROOM_TYPE_LABELS } from '@/constants';
 import { formatCurrency, formatDate, formatDistance } from '@/utils/format';
+import PackageDetail from './PackageDetail';
 
-function HotelCard({ city, hotel }) {
-  return (
-    <div className="border rounded p-3 h-100">
-      <div className="section-title mb-1">{city}</div>
-      <div className="fw-semibold">{hotel.name}</div>
-      <Stars count={hotel.stars} />
-      <div className="small text-secondary mt-1">
-        {hotel.nights} night(s) · {formatDistance(hotel.distanceMeters)} from the Haram
-      </div>
-    </div>
-  );
-}
-
-function PackageDetail() {
-  const { id } = useParams();
-  const { data: pkg, loading, error, reload } = useFetch(() => packageService.get(id), [id]);
-  const { items: comparing } = useCompare();
-  // How many packages this agency has listed, for the "more from this agency" link.
-  const agencyId = pkg?.agency?._id;
-  const { meta: agencyListing } = useFetch(
-    () => (agencyId ? packageService.browse({ agencyId, limit: 1 }) : Promise.resolve(null)),
-    [agencyId],
-  );
-  // The mobile booking bar hides while the booking card itself is on screen.
-  const [bookCard, setBookCard] = useState(null);
-  const [bookCardVisible, setBookCardVisible] = useState(false);
-  useEffect(() => {
-    if (!bookCard) return undefined;
-    const observer = new IntersectionObserver(([entry]) => setBookCardVisible(entry.isIntersecting), { threshold: 0.25 });
-    observer.observe(bookCard);
-    return () => observer.disconnect();
-  }, [bookCard]);
-
-  if (loading && !pkg) return <LoadingState label="Loading package…" />;
-  if (error) {
-    return (
-      <>
-        <ErrorState title="Package unavailable" message={error} onRetry={reload} />
-        <div className="text-center">
-          <Link href="/packages">← Browse all packages</Link>
-        </div>
-      </>
-    );
+/** Loads the package for the server render; null if missing, undefined if the API is unreachable. */
+async function loadPackage(id) {
+  try {
+    return await getPublicPackage(id);
+  } catch {
+    return undefined;
   }
+}
 
-  const agency = pkg.agency;
-  const agencyHref = agency ? `/packages?agencyId=${agency._id}` : null;
-  const otherPackages = Math.max((agencyListing?.total || 0) - 1, 0);
+function describe(pkg) {
+  const agency = pkg.agency?.businessName;
+  return [
+    `${pkg.durationDays}-day Umrah from ${pkg.departureCity}, departing ${formatDate(pkg.departureDate)}.`,
+    `${pkg.makkahHotel.name} (${formatDistance(pkg.makkahHotel.distanceMeters)} from the Haram) and ${pkg.madinahHotel.name}.`,
+    `${formatCurrency(pkg.pricePerPerson)} per person, ${ROOM_TYPE_LABELS[pkg.roomType]?.toLowerCase() || 'shared room'}.`,
+    agency && `By verified vendor ${agency}.`,
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const pkg = await loadPackage(id);
+  if (pkg === null) return { title: 'Package not found', robots: { index: false } };
+  if (!pkg) return { title: 'Umrah package' };
+
+  const path = `/packages/${id}`;
+  const title = pkg.agency ? `${pkg.title} by ${pkg.agency.businessName}` : pkg.title;
+  const description = describe(pkg);
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { ...baseOpenGraph, url: path, title, description },
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
+
+function structuredData(pkg, id) {
+  const url = absoluteUrl(`/packages/${id}`);
+  const seller = pkg.agency && { '@type': 'Organization', name: pkg.agency.businessName };
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: pkg.title,
+      description: pkg.description || describe(pkg),
+      url,
+      category: 'Umrah package',
+      ...(seller && { brand: { '@type': 'Brand', name: pkg.agency.businessName } }),
+      offers: {
+        '@type': 'Offer',
+        url,
+        price: pkg.pricePerPerson,
+        priceCurrency: 'PKR',
+        availability: pkg.availableSeats > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+        validThrough: pkg.departureDate,
+        ...(seller && { seller }),
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+        { '@type': 'ListItem', position: 2, name: 'Umrah packages', item: absoluteUrl('/packages') },
+        { '@type': 'ListItem', position: 3, name: pkg.title, item: url },
+      ],
+    },
+  ];
+}
+
+async function Detail({ params }) {
+  const { id } = await params;
+  const pkg = await loadPackage(id);
+  // Missing or unreachable: the client component shows the error state (with retry).
   return (
-    <div className="has-mobile-cta">
-      <Link href="/packages" className="small d-inline-block mb-3">
-        ← All packages
-      </Link>
-      <div className="mb-4">
-        <div className="section-title mb-1">{pkg.durationDays}-day Umrah package</div>
-        <h1 className="h2 mb-1">{pkg.title}</h1>
-        <p className="text-secondary mb-0">
-          by{' '}
-          {agency ? (
-            <Link href={agencyHref} className="fw-semibold">
-              {agency.businessName}
-            </Link>
-          ) : (
-            <span className="fw-semibold text-body">—</span>
-          )}
-          <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified vendor</span>
-        </p>
-        <div className="d-flex flex-wrap align-items-start gap-2 mt-3">
-          <CompareToggle pkg={pkg} />
-          {comparing.length >= 2 ? (
-            <Link href={compareHref(comparing.map((x) => x._id))} className="btn btn-sm btn-outline-primary">
-              Compare {comparing.length} packages →
-            </Link>
-          ) : (
-            comparing.length === 1 && (
-              <span className="small text-secondary align-self-center">
-                {comparing[0]._id === pkg._id ? 'Added. ' : ''}Pick one more package to compare —{' '}
-                <Link href="/packages">browse packages</Link>
-              </span>
-            )
-          )}
-        </div>
-      </div>
-
-      <Row className="g-4">
-        <Col lg={8}>
-          <Card className="mb-4">
-            <CardBody className="p-4">
-              <DetailList
-                items={[
-                  { label: 'Departure', value: formatDate(pkg.departureDate) },
-                  { label: 'Return', value: formatDate(pkg.returnDate) },
-                  { label: 'Departing from', value: pkg.departureCity },
-                  { label: 'Room sharing', value: ROOM_TYPE_LABELS[pkg.roomType] },
-                ]}
-              />
-            </CardBody>
-          </Card>
-
-          <Card className="mb-4">
-            <CardBody className="p-4">
-              <h2 className="h6 section-title mb-3">Hotels</h2>
-              <Row className="g-3">
-                <Col sm={6}>
-                  <HotelCard city="Makkah" hotel={pkg.makkahHotel} />
-                </Col>
-                <Col sm={6}>
-                  <HotelCard city="Madinah" hotel={pkg.madinahHotel} />
-                </Col>
-              </Row>
-            </CardBody>
-          </Card>
-
-          <Card className="mb-4">
-            <CardBody className="p-4">
-              <h2 className="h6 section-title mb-3">About this package</h2>
-              <p className="mb-4" style={{ whiteSpace: 'pre-line' }}>
-                {pkg.description}
-              </p>
-              <h3 className="h6 mb-2">What’s included</h3>
-              <ul className="list-unstyled row g-2 mb-0">
-                {INCLUSION_OPTIONS.map((o) => {
-                  const included = pkg.inclusions.includes(o.value);
-                  return (
-                    <li key={o.value} className={`col-6 col-md-4 small ${included ? '' : 'text-secondary text-decoration-line-through'}`}>
-                      <span className={included ? 'text-success me-1' : 'me-1'} aria-hidden="true">
-                        {included ? '✓' : '✕'}
-                      </span>
-                      {o.label}
-                      <span className="visually-hidden">{included ? ' (included)' : ' (not included)'}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </CardBody>
-          </Card>
-
-          {agency && (
-            <Card>
-              <CardBody className="p-4">
-                <h2 className="h6 section-title mb-3">About the vendor</h2>
-                <DetailList
-                  items={[
-                    { label: 'Business', value: agency.businessName },
-                    { label: 'Vendor type', value: agency.vendorTypeLabel },
-                    { label: 'Based in', value: [agency.city, agency.province].filter(Boolean).join(', ') },
-                    { label: 'Experience', value: agency.experience !== undefined ? `${agency.experience} years` : null },
-                    { label: 'Verified since', value: formatDate(agency.verifiedSince) },
-                  ]}
-                />
-                {otherPackages > 0 ? (
-                  <Link href={agencyHref} className="btn btn-outline-primary mt-3">
-                    View {otherPackages} more package{otherPackages > 1 ? 's' : ''} from {agency.businessName} →
-                  </Link>
-                ) : (
-                  agencyListing && (
-                    <p className="small text-secondary mt-3 mb-0">This is currently the only package from {agency.businessName}.</p>
-                  )
-                )}
-              </CardBody>
-            </Card>
-          )}
-        </Col>
-
-        <Col lg={4}>
-          <Card id="book" innerRef={setBookCard} className="position-sticky" style={{ top: 88, scrollMarginTop: 88 }}>
-            <CardBody className="p-4">
-              <div className="h3 mb-0 text-primary">{formatCurrency(pkg.pricePerPerson)}</div>
-              <div className="small text-secondary mb-3">per person · {ROOM_TYPE_LABELS[pkg.roomType]}</div>
-              <div className="mb-4">
-                <SeatAvailability pkg={pkg} />
-              </div>
-              <SeatRequestForm pkg={pkg} />
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Phones and tablets: the booking card sits at the bottom of the page, so keep a shortcut in reach. */}
-      <div className={`mobile-cta ${bookCardVisible ? 'd-none' : ''}`}>
-        <div className="lh-sm">
-          <div className="fw-bold text-primary">{formatCurrency(pkg.pricePerPerson)}</div>
-          <div className="small text-secondary">per person</div>
-        </div>
-        <a href="#book" className="btn btn-primary px-4">
-          {pkg.availableSeats > 0 ? 'Request seats' : 'Fully booked'}
-        </a>
-      </div>
-    </div>
+    <>
+      {pkg && <JsonLd data={structuredData(pkg, id)} />}
+      <PackageDetail initialPackage={pkg || undefined} />
+    </>
   );
 }
 
-export default function PackageDetailPage() {
+export default function PackageDetailPage({ params }) {
   return (
-    <Suspense fallback={<LoadingState />}>
-      <PackageDetail />
+    <Suspense fallback={<LoadingState label="Loading package…" />}>
+      <Detail params={params} />
     </Suspense>
   );
 }
