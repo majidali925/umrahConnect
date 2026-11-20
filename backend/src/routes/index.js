@@ -4,7 +4,7 @@ const { sendSuccess } = require('../utils/apiResponse');
 
 const router = express.Router();
 
-router.get('/', (_req, res) =>
+router.get('/health', (_req, res) =>
   sendSuccess(res, {
     message: 'API is running',
     data: { database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' },
