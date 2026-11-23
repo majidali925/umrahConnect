@@ -20,9 +20,12 @@ const SORT_OPTIONS = [
 
 const PRICE_OPTIONS = [200000, 300000, 400000, 500000, 750000, 1000000];
 
+// Wait this long after the last keystroke before searching.
+const SEARCH_DELAY = 500;
+
 function PackageBrowser() {
   const { get, page, setParams } = useUrlParams();
-  const [search, setSearch] = useUrlSearch();
+  const [search, setSearch, searchPending] = useUrlSearch('search', { delay: SEARCH_DELAY });
   const filters = {
     search: get('search'),
     departureCity: get('departureCity'),
@@ -42,6 +45,7 @@ function PackageBrowser() {
     [page, filters.search, filters.departureCity, filters.agencyId, filters.from, filters.maxPrice, filters.sort],
   );
   const agencyName = filters.agencyId ? data?.[0]?.agency?.businessName || 'this agency' : null;
+  const searching = searchPending || (loading && Boolean(filters.search));
 
   return (
     <>
@@ -68,6 +72,11 @@ function PackageBrowser() {
             <Col md={4}>
               <Label for="pkg-search" className="small">
                 Search
+                {searching && (
+                  <span className="text-secondary ms-2" role="status">
+                    Searching…
+                  </span>
+                )}
               </Label>
               <div className="d-flex gap-2">
                 <Input

@@ -27,19 +27,20 @@ export function useUrlParams() {
 }
 
 /**
- * A search box bound to a URL param: returns the input value and setter; the URL (and so
- * the list query) updates once the user pauses typing.
+ * A search box bound to a URL param: returns [value, setValue, pending]. The URL (and so
+ * the list query) updates once the user pauses typing for `delay` ms; `pending` is true
+ * while typed text is still waiting to be applied.
  */
-export function useUrlSearch(key = 'search') {
+export function useUrlSearch(key = 'search', { delay = 350 } = {}) {
   const { get, setParams } = useUrlParams();
   const urlValue = get(key);
   const [value, setValue] = useState(urlValue);
-  const debounced = useDebounce(value.trim());
+  const debounced = useDebounce(value.trim(), delay);
 
   useEffect(() => {
     if (debounced !== urlValue) setParams({ [key]: debounced });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounced]);
 
-  return [value, setValue];
+  return [value, setValue, value.trim() !== urlValue];
 }

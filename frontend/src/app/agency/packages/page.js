@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { Card, CardBody, Table, Button, ButtonGroup, Alert } from 'reactstrap';
+import { Card, CardBody, Table, Button, ButtonGroup, Alert, Input } from 'reactstrap';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import Pagination from '@/components/common/Pagination';
@@ -11,7 +11,7 @@ import { LoadingState, ErrorState, EmptyState } from '@/components/common/States
 import AgencyStatusGate from '@/features/agency/components/AgencyStatusGate';
 import { agencyPackageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
-import { useUrlParams } from '@/hooks/useUrlParams';
+import { useUrlParams, useUrlSearch } from '@/hooks/useUrlParams';
 import { PACKAGE_STATUS_META } from '@/constants';
 import { formatCurrency, formatDate } from '@/utils/format';
 
@@ -50,13 +50,16 @@ const ACTIONS = {
 function PackageList() {
   const { get, page, setParams } = useUrlParams();
   const status = get('status');
+  const search = get('search');
+  const [searchInput, setSearchInput, searchPending] = useUrlSearch('search', { delay: 500 });
   const [pending, setPending] = useState(null); // { action, pkg }
   const [notice, setNotice] = useState(null);
 
   const { data, meta, loading, error, reload } = useFetch(
-    () => agencyPackageService.list({ status, page, limit: 15 }),
-    [status, page],
+    () => agencyPackageService.list({ status, search, page, limit: 15 }),
+    [status, search, page],
   );
+  const filtered = Boolean(status || search);
 
   const action = pending && ACTIONS[pending.action];
 
@@ -80,7 +83,7 @@ function PackageList() {
       )}
 
       <Card>
-        <CardBody className="border-bottom py-3">
+        <CardBody className="border-bottom py-3 d-flex flex-wrap align-items-center gap-2">
           <ButtonGroup role="group" aria-label="Filter packages by status" className="flex-wrap">
             {FILTERS.map((f) => (
               <Button
@@ -95,6 +98,21 @@ function PackageList() {
               </Button>
             ))}
           </ButtonGroup>
+          <div className="ms-md-auto d-flex align-items-center gap-2" style={{ flex: '1 1 14rem', maxWidth: '22rem' }}>
+            {(searchPending || (loading && search)) && (
+              <span className="small text-secondary text-nowrap" role="status">
+                Searching…
+              </span>
+            )}
+            <Input
+              type="search"
+              bsSize="sm"
+              placeholder="Search title or city…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              aria-label="Search your packages"
+            />
+          </div>
         </CardBody>
         {loading && !data ? (
           <LoadingState label="Loading packages…" />
@@ -102,12 +120,18 @@ function PackageList() {
           <ErrorState message={error} onRetry={reload} />
         ) : data.length === 0 ? (
           <EmptyState
-            title={status ? 'No packages match this filter' : 'No packages yet'}
-            message="Create your first package to start receiving seat requests from customers."
+            title={filtered ? 'No packages match these filters' : 'No packages yet'}
+            message={
+              filtered
+                ? 'Try a different search or status filter.'
+                : 'Create your first package to start receiving seat requests from customers.'
+            }
             action={
-              <Link href="/agency/packages/new" className="btn btn-primary mt-2">
-                Create a package
-              </Link>
+              filtered ? null : (
+                <Link href="/agency/packages/new" className="btn btn-primary mt-2">
+                  Create a package
+                </Link>
+              )
             }
           />
         ) : (
