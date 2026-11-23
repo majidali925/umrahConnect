@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/layouts/SiteHeader';
 import SiteFooter from '@/components/layouts/SiteFooter';
 import JsonLd from '@/components/seo/JsonLd';
+import SignedInRedirect from '@/components/layouts/SignedInRedirect';
 import { SITE_NAME, SITE_DESCRIPTION, absoluteUrl } from '@/lib/site';
 import styles from './page.module.scss';
 
@@ -47,6 +48,7 @@ export default function HomePage() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <JsonLd data={STRUCTURED_DATA} />
+      <SignedInRedirect />
       <SiteHeader />
 
       <section className={styles.hero}>

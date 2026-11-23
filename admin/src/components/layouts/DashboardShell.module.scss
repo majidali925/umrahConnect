@@ -117,18 +117,6 @@
   }
 }
 
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: $brand-green;
-  background: $brand-gold-light;
-  border: 1px solid rgba($brand-gold, 0.4);
-}
 
 .content {
   padding: 2rem 1.5rem 3rem;

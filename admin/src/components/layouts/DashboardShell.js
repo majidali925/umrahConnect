@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from 'reactstrap';
 import BrandLogo from '@/components/common/BrandLogo';
+import UserMenu from '@/components/common/UserMenu';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/hooks/useLogout';
-import { initials } from '@/utils/format';
 import styles from './DashboardShell.module.scss';
 
 /**
@@ -56,19 +56,8 @@ export default function DashboardShell({ navItems, areaLabel, children }) {
           <div className="d-lg-none">
             <BrandLogo size="sm" href="/dashboard" />
           </div>
-          <div className="ms-auto d-flex align-items-center gap-2 gap-sm-3">
-            <div className="text-end d-none d-sm-block lh-sm">
-              <div className="fw-semibold small">{user?.fullName}</div>
-              <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                {user?.email}
-              </div>
-            </div>
-            <div className={`${styles.avatar} d-none d-sm-grid`} aria-hidden="true">
-              {initials(user?.fullName)}
-            </div>
-            <Button color="light" size="sm" className="border" onClick={logout}>
-              Log out
-            </Button>
+          <div className="ms-auto">
+            <UserMenu name={user?.fullName} email={user?.email} roleLabel="Super Admin" onLogout={logout} />
           </div>
         </header>
         <main className={styles.content}>{children}</main>

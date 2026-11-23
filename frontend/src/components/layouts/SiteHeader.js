@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Collapse, Navbar, NavbarToggler, Nav, NavItem, Container, Button } from 'reactstrap';
+import { Collapse, Navbar, NavbarToggler, Nav, NavItem, Container } from 'reactstrap';
 import BrandLogo from '@/components/common/BrandLogo';
+import UserMenu from '@/components/common/UserMenu';
+import { roleLabelFor } from '@/components/common/accountMenu';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogout } from '@/hooks/useLogout';
 import { homeRouteFor } from '@/utils/routes';
@@ -52,18 +54,15 @@ export default function SiteHeader() {
                 </>
               )}
               {isAuthenticated && (
-                <>
-                  <NavItem>
-                    <Link className="btn btn-primary" href={homeRouteFor(user, agency)}>
-                      My dashboard
-                    </Link>
-                  </NavItem>
-                  <NavItem>
-                    <Button color="link" className="nav-link" onClick={logout}>
-                      Log out
-                    </Button>
-                  </NavItem>
-                </>
+                <NavItem className="mt-2 mt-md-0 ms-md-1">
+                  <UserMenu
+                    name={user?.fullName}
+                    email={user?.email}
+                    roleLabel={roleLabelFor(user, agency)}
+                    items={[{ href: homeRouteFor(user, agency), label: 'My dashboard', icon: 'home' }]}
+                    onLogout={logout}
+                  />
+                </NavItem>
               )}
             </Nav>
           </Collapse>
