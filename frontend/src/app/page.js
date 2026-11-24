@@ -140,13 +140,10 @@ export default function HomePage() {
                 </p>
                 <div className="d-flex flex-wrap gap-3">
                   <Link href="/packages" className="btn btn-gold btn-lg">
-                    Browse Umrah packages
+                    Umrah packages
                   </Link>
                   <Link href="/register" className="btn btn-outline-light btn-lg">
                     Create a free account
-                  </Link>
-                  <Link href="/register/vendor" className="btn btn-outline-light btn-lg">
-                    List your agency
                   </Link>
                 </div>
               </div>
