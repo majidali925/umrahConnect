@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Card, CardBody, Row, Col } from 'reactstrap';
 import DetailList from '@/components/common/DetailList';
+import CloudImage from '@/components/common/CloudImage';
 import { LoadingState, ErrorState } from '@/components/common/States';
 import { SeatAvailability, Stars } from '@/features/packages/components/PackageCard';
 import SeatRequestForm from '@/features/packages/components/SeatRequestForm';
@@ -14,6 +15,7 @@ import { packageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { INCLUSION_OPTIONS, ROOM_TYPE_LABELS } from '@/constants';
 import { formatCurrency, formatDate, formatDistance } from '@/utils/format';
+import styles from './PackageDetail.module.scss';
 
 function HotelCard({ city, hotel }) {
   return (
@@ -65,7 +67,7 @@ export default function PackageDetail({ initialPackage }) {
   }
 
   const agency = pkg.agency;
-  const agencyHref = agency ? `/packages?agencyId=${agency._id}` : null;
+  const agencyHref = agency ? `/agencies/${agency._id}` : null;
   const otherPackages = Math.max((agencyListing?.total || 0) - 1, 0);
 
   return (
@@ -74,19 +76,39 @@ export default function PackageDetail({ initialPackage }) {
         ← All packages
       </Link>
       <div className="mb-4">
-        <div className="section-title mb-1">{pkg.durationDays}-day Umrah package</div>
-        <h1 className="h2 mb-1">{pkg.title}</h1>
-        <p className="text-secondary mb-0">
-          by{' '}
-          {agency ? (
-            <Link href={agencyHref} className="fw-semibold">
-              {agency.businessName}
-            </Link>
-          ) : (
-            <span className="fw-semibold text-body">—</span>
+        <header className={pkg.coverImage ? styles.hero : ''}>
+          {pkg.coverImage && (
+            <CloudImage
+              src={pkg.coverImage.url}
+              alt=""
+              fill
+              preload
+              sizes="(min-width: 1400px) 1296px, 100vw"
+              className={styles.heroImg}
+            />
           )}
-          <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified vendor</span>
-        </p>
+          <div className={pkg.coverImage ? styles.heroContent : ''}>
+            <div className={`section-title mb-1 ${pkg.coverImage ? styles.heroEyebrow : ''}`}>
+              {pkg.durationDays}-day Umrah package
+            </div>
+            <h1 className="h2 mb-1">{pkg.title}</h1>
+            <p className={`mb-0 ${pkg.coverImage ? '' : 'text-secondary'}`}>
+              by{' '}
+              {agency ? (
+                <Link href={agencyHref} className={`fw-semibold ${pkg.coverImage ? styles.heroLink : ''}`}>
+                  {agency.businessName}
+                </Link>
+              ) : (
+                <span className="fw-semibold">—</span>
+              )}
+              <span
+                className={`badge rounded-pill ms-2 ${pkg.coverImage ? 'bg-success text-white' : 'badge-soft badge-soft-success'}`}
+              >
+                Verified vendor
+              </span>
+            </p>
+          </div>
+        </header>
         <div className="d-flex flex-wrap align-items-start gap-2 mt-3">
           <CompareToggle pkg={pkg} />
           {comparing.length >= 2 ? (
@@ -170,15 +192,11 @@ export default function PackageDetail({ initialPackage }) {
                     { label: 'Verified since', value: formatDate(agency.verifiedSince) },
                   ]}
                 />
-                {otherPackages > 0 ? (
-                  <Link href={agencyHref} className="btn btn-outline-primary mt-3">
-                    View {otherPackages} more package{otherPackages > 1 ? 's' : ''} from {agency.businessName} →
-                  </Link>
-                ) : (
-                  agencyListing && (
-                    <p className="small text-secondary mt-3 mb-0">This is currently the only package from {agency.businessName}.</p>
-                  )
-                )}
+                <Link href={agencyHref} className="btn btn-outline-primary mt-3">
+                  {otherPackages > 0
+                    ? `View ${otherPackages} more package${otherPackages > 1 ? 's' : ''} and reviews →`
+                    : `See ${agency.businessName}’s reviews →`}
+                </Link>
               </CardBody>
             </Card>
           )}

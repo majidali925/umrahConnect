@@ -1,9 +1,9 @@
-const fs = require('fs');
 const path = require('path');
 const { Agency, AgencyDocument } = require('../models');
 const env = require('../config/env');
 const ApiError = require('../utils/ApiError');
 const audit = require('./audit.service');
+const storage = require('./storage.service');
 const notification = require('./notification.service');
 const { submission: submissionSchema } = require('../validators/agency.validator');
 const {
@@ -106,20 +106,18 @@ function buildAgencyView(agency, documents, user) {
   };
 }
 
-function resolveDocumentPath(document) {
-  const root = path.resolve(env.uploads.dir);
-  const filePath = path.resolve(root, document.documentUrl);
-  // Defense in depth: never serve anything outside the uploads directory.
-  if (!filePath.startsWith(root + path.sep)) throw ApiError.notFound('Document not found');
-  return filePath;
+/** The storage reference of a document, as expected by storage.service. */
+function storedFile(document) {
+  return {
+    provider: document.storageProvider || storage.PROVIDERS.LOCAL,
+    key: document.documentUrl,
+    resourceType: document.storageResourceType,
+  };
 }
 
-async function removeFile(relativePath) {
-  try {
-    await fs.promises.unlink(resolveDocumentPath({ documentUrl: relativePath }));
-  } catch (err) {
-    if (err.code !== 'ENOENT') console.error(`[uploads] Could not delete ${relativePath}: ${err.message}`);
-  }
+/** Opens a document's file for streaming to an already-authorized requester. */
+async function openDocumentFile(document) {
+  return { document, stream: await storage.openFile(storedFile(document)) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -169,9 +167,6 @@ async function updateMyAgency(user, data) {
 
 /** Stores an uploaded document, replacing any existing document of the same type. */
 async function addDocument(user, agency, file, documentType) {
-  const relativePath = path.relative(env.uploads.dir, file.path);
-
-  // On any error below, the uploaded file is removed by cleanupUploadOnError.
   if (!DOCUMENT_REQUIREMENTS[agency.vendorType].some((r) => r.type === documentType)) {
     throw ApiError.badRequest(
       `${DOCUMENT_TYPES[documentType].label} is not applicable to ${VENDOR_TYPE_LABELS[agency.vendorType]}s`,
@@ -181,18 +176,30 @@ async function addDocument(user, agency, file, documentType) {
 
   const previous = await AgencyDocument.find({ agencyId: agency._id, documentType });
 
-  const document = await AgencyDocument.create({
-    agencyId: agency._id,
-    documentType,
-    category: DOCUMENT_TYPES[documentType].category,
-    documentUrl: relativePath,
-    originalFileName: path.basename(file.originalname).slice(0, 255),
+  const stored = await storage.saveFile(file.buffer, {
+    folder: `agency-documents/${agency._id}`,
     mimeType: file.mimetype,
-    size: file.size,
   });
+  let document;
+  try {
+    document = await AgencyDocument.create({
+      agencyId: agency._id,
+      documentType,
+      category: DOCUMENT_TYPES[documentType].category,
+      documentUrl: stored.key,
+      storageProvider: stored.provider,
+      storageResourceType: stored.resourceType,
+      originalFileName: path.basename(file.originalname).slice(0, 255),
+      mimeType: file.mimetype,
+      size: file.size,
+    });
+  } catch (err) {
+    await storage.deleteFile(stored); // don't leave an orphaned file behind
+    throw err;
+  }
 
   for (const old of previous) {
-    await removeFile(old.documentUrl);
+    await storage.deleteFile(storedFile(old));
     await old.deleteOne();
   }
 
@@ -214,7 +221,7 @@ async function deleteDocument(user, documentId) {
   const document = await AgencyDocument.findOne({ _id: documentId, agencyId: agency._id });
   if (!document) throw ApiError.notFound('Document not found');
 
-  await removeFile(document.documentUrl);
+  await storage.deleteFile(storedFile(document));
   await document.deleteOne();
 
   await audit.record({
@@ -231,7 +238,7 @@ async function getMyDocumentFile(user, documentId) {
   const agency = await getAgencyByUserId(user._id);
   const document = await AgencyDocument.findOne({ _id: documentId, agencyId: agency._id });
   if (!document) throw ApiError.notFound('Document not found');
-  return { document, filePath: resolveDocumentPath(document) };
+  return openDocumentFile(document);
 }
 
 async function submitApplication(user) {
@@ -313,7 +320,7 @@ async function getVerificationStatus(user) {
 
 module.exports = {
   buildAgencyView,
-  resolveDocumentPath,
+  openDocumentFile,
   getAgencyByUserId,
   assertEditable,
   getMyAgency,

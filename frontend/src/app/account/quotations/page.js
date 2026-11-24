@@ -7,6 +7,8 @@ import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import Pagination from '@/components/common/Pagination';
 import ConfirmModal from '@/components/common/ConfirmModal';
+import { StarRating } from '@/components/common/StarRating';
+import ReviewModal from '@/features/packages/components/ReviewModal';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
 import { packageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
@@ -50,6 +52,7 @@ function AgencyContact({ contact }) {
 export default function MyQuotationsPage() {
   const [page, setPage] = useState(1);
   const [withdrawing, setWithdrawing] = useState(null);
+  const [reviewing, setReviewing] = useState(null);
   const [notice, setNotice] = useState(null);
   const { data, meta, loading, error, reload } = useFetch(() => packageService.myQuotations({ page, limit: 10 }), [page]);
 
@@ -143,11 +146,39 @@ export default function MyQuotationsPage() {
                 )}
                 {q.agency?.contact && <AgencyContact contact={q.agency.contact} />}
 
+                {q.review && (
+                  <div className="d-flex flex-wrap align-items-center gap-2 small mt-3">
+                    <span className="text-secondary">Your review:</span>
+                    <StarRating value={q.review.rating} size="sm" />
+                    {q.review.comment && <span className="text-truncate min-w-0" style={{ maxWidth: '32rem' }}>“{q.review.comment}”</span>}
+                  </div>
+                )}
+                {q.canReview && !q.review && (
+                  <div className="bg-gold-light rounded p-3 small mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span>
+                      <strong>How was your trip?</strong> Help other travellers by rating {q.agency?.businessName || 'the agency'}.
+                    </span>
+                    <Button size="sm" color="primary" onClick={() => setReviewing(q)}>
+                      Write a review
+                    </Button>
+                  </div>
+                )}
+
                 <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
                   {q.package && (
                     <Link href={`/packages/${q.package._id}`} className="btn btn-sm btn-light border">
                       View package
                     </Link>
+                  )}
+                  {q.agency && (
+                    <Link href={`/agencies/${q.agency._id}`} className="btn btn-sm btn-light border">
+                      Agency page
+                    </Link>
+                  )}
+                  {q.canReview && q.review && (
+                    <Button size="sm" color="primary" outline onClick={() => setReviewing(q)}>
+                      Edit review
+                    </Button>
                   )}
                   {q.status === 'PENDING' && (
                     <Button size="sm" color="danger" outline onClick={() => setWithdrawing(q)}>
@@ -161,6 +192,16 @@ export default function MyQuotationsPage() {
           <Pagination meta={meta} onChange={setPage} />
         </div>
       )}
+
+      <ReviewModal
+        key={reviewing?._id || 'closed'}
+        quotation={reviewing}
+        onClose={() => setReviewing(null)}
+        onSaved={async (message) => {
+          setNotice(message);
+          await reload();
+        }}
+      />
 
       <ConfirmModal
         isOpen={Boolean(withdrawing)}

@@ -1,0 +1,234 @@
+@import '../../../styles/variables';
+
+/* Header photo with the agency's name over it */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 340px;
+  padding: 2rem;
+  overflow: hidden;
+  border-radius: $border-radius-xl;
+  background: $brand-green-dark;
+  color: #ffffff;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.2) 55%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  @media (min-width: 992px) {
+    min-height: 400px;
+    padding: 2.5rem;
+  }
+
+  @media (max-width: 575.98px) {
+    min-height: 260px;
+    padding: 1.25rem;
+  }
+}
+
+// No header photo yet: a branded backdrop rather than an empty box.
+.heroEmpty {
+  min-height: 220px;
+  background:
+    radial-gradient(circle at 85% 20%, rgba($brand-gold, 0.3) 0, transparent 40%),
+    repeating-linear-gradient(45deg, rgba(#ffffff, 0.05) 0 2px, transparent 2px 16px),
+    linear-gradient(135deg, $brand-green 0%, $brand-green-dark 100%);
+
+  &::after {
+    display: none;
+  }
+
+  @media (min-width: 992px) {
+    min-height: 260px;
+  }
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+
+  @media (max-width: 575.98px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: $border-radius-lg;
+  background: #ffffff;
+  color: $brand-green;
+  border: 3px solid rgba(#ffffff, 0.85);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  text-shadow: none;
+
+  @media (max-width: 575.98px) {
+    width: 60px;
+    height: 60px;
+    font-size: 1.25rem;
+  }
+}
+
+.hero .heroTitle {
+  color: #ffffff;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.4rem);
+  font-weight: 800;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.25rem;
+  color: rgba(#ffffff, 0.9);
+  font-size: 0.95rem;
+}
+
+.heroRating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #ffffff;
+  text-decoration: none;
+
+  &:hover {
+    color: $brand-gold-light;
+  }
+}
+
+/* Key facts strip below the header */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 1rem;
+  border: 1px solid $line;
+  border-radius: $border-radius-lg;
+  background: #ffffff;
+  overflow: hidden;
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat {
+  padding: 1rem 1.25rem;
+  color: inherit;
+  text-decoration: none;
+
+  & + & {
+    border-left: 1px solid $line;
+  }
+
+  @media (max-width: 767.98px) {
+    &:nth-child(odd) {
+      border-left: 0;
+    }
+
+    &:nth-child(n + 3) {
+      border-top: 1px solid $line;
+    }
+  }
+}
+
+a.stat:hover {
+  background: $surface;
+  color: inherit;
+}
+
+.statValue {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: $brand-green;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: $muted;
+}
+
+.section {
+  margin-top: 2.5rem;
+  scroll-margin-top: 88px;
+}
+
+/* Reviews */
+.summary {
+  @media (min-width: 992px) {
+    position: sticky;
+    top: 88px;
+  }
+}
+
+.bigScore {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  color: $ink;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr 2rem;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: $line;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: $brand-gold;
+  }
+}
+
+.review {
+  padding: 1.25rem 1.5rem;
+
+  & + & {
+    border-top: 1px solid $line;
+  }
+}
+
+.reviewAvatar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: $brand-green-light;
+  color: $brand-green-dark;
+  font-size: 0.85rem;
+  font-weight: 700;
+}

@@ -3,6 +3,8 @@ const ApiError = require('../utils/ApiError');
 const { getPagination, buildMeta, escapeRegex } = require('../utils/pagination');
 const audit = require('./audit.service');
 const notification = require('./notification.service');
+const storage = require('./storage.service');
+const reviewService = require('./review.service');
 const {
   AGENCY_STATUS,
   PACKAGE_STATUS,
@@ -162,6 +164,7 @@ async function deletePackage(user, agency, packageId) {
 
   await Quotation.deleteMany({ packageId: pkg._id });
   await pkg.deleteOne();
+  await storage.deleteImage(pkg.coverImage?.publicId);
   await audit.record({
     performedBy: user._id,
     action: AUDIT_ACTIONS.PACKAGE_DELETED,
@@ -169,6 +172,51 @@ async function deletePackage(user, agency, packageId) {
     entityId: pkg._id,
     metadata: { title: pkg.title },
   });
+}
+
+/** Uploads a package's cover photo, replacing (and deleting) the previous one. */
+async function setCoverImage(user, agency, packageId, file) {
+  const pkg = await findMyPackage(agency, packageId);
+  const image = await storage.saveImage(file.buffer, { folder: `agencies/${agency._id}` });
+  const previous = pkg.coverImage?.publicId;
+  // Conditional on the package still existing, so a concurrent delete can't leave an orphan.
+  const saved = await Package.findOneAndUpdate(
+    { _id: pkg._id, agencyId: agency._id },
+    { $set: { coverImage: image } },
+    { returnDocument: 'after' },
+  );
+  if (!saved) {
+    await storage.deleteImage(image.publicId);
+    throw ApiError.notFound('Package not found');
+  }
+  if (previous) await storage.deleteImage(previous);
+
+  await audit.record({
+    performedBy: user._id,
+    action: AUDIT_ACTIONS.PACKAGE_UPDATED,
+    entityType: ENTITY_TYPES.PACKAGE,
+    entityId: pkg._id,
+    metadata: { title: pkg.title, coverImage: 'uploaded' },
+  });
+  return saved.toJSON();
+}
+
+async function removeCoverImage(user, agency, packageId) {
+  const pkg = await findMyPackage(agency, packageId);
+  const previous = pkg.coverImage?.publicId;
+  if (!previous) return pkg.toJSON();
+  pkg.coverImage = undefined;
+  await pkg.save();
+  await storage.deleteImage(previous);
+
+  await audit.record({
+    performedBy: user._id,
+    action: AUDIT_ACTIONS.PACKAGE_UPDATED,
+    entityType: ENTITY_TYPES.PACKAGE,
+    entityId: pkg._id,
+    metadata: { title: pkg.title, coverImage: 'removed' },
+  });
+  return pkg.toJSON();
 }
 
 /* ------------------------------------------------------------------ */
@@ -313,9 +361,11 @@ async function requestQuotation(customer, packageId, { seats, message }) {
 }
 
 /** Shapes a quotation for its customer; agency contact details only after confirmation. */
-function customerView(q) {
+function customerView(q, review) {
   const json = q.toJSON();
   const pkg = q.packageId;
+  json.canReview = reviewService.canReview(q, pkg);
+  json.review = review ? { rating: review.rating, comment: review.comment || null, updatedAt: review.updatedAt } : null;
   json.package = pkg
     ? {
         _id: pkg._id,
@@ -352,7 +402,11 @@ async function listMyQuotations(customer, query) {
       .populate('agencyId', CONTACT_AGENCY_FIELDS),
     Quotation.countDocuments(filter),
   ]);
-  return { items: items.map(customerView), meta: buildMeta(pagination, total) };
+  const reviews = await reviewService.reviewsForQuotations(
+    customer._id,
+    items.map((q) => q._id),
+  );
+  return { items: items.map((q) => customerView(q, reviews[String(q._id)])), meta: buildMeta(pagination, total) };
 }
 
 /** A customer may withdraw a request only while it is still pending. */
@@ -550,6 +604,10 @@ module.exports = {
   updatePackage,
   setPackageStatus,
   deletePackage,
+  setCoverImage,
+  removeCoverImage,
+  publicFilter,
+  publicAgency,
   browsePackages,
   getPublicPackage,
   listDepartureCities,

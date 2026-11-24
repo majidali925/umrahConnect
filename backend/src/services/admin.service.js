@@ -271,7 +271,7 @@ async function getDocumentFile(agencyId, documentId, admin) {
     documentType: document.documentType,
   });
 
-  return { document, filePath: agencyService.resolveDocumentPath(document) };
+  return agencyService.openDocumentFile(document);
 }
 
 async function listUsers(query) {

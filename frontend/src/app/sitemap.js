@@ -22,8 +22,12 @@ export default async function sitemap() {
     // API unavailable: still serve the static pages.
   }
 
+  // Every agency with at least one listed package has a public page worth indexing.
+  const agencies = [...new Set(packages.map((p) => p.agency?._id).filter(Boolean))];
+
   return [
     ...pages,
+    ...agencies.map((id) => ({ url: absoluteUrl(`/agencies/${id}`), changeFrequency: 'weekly', priority: 0.7 })),
     ...packages.map((p) => ({
       url: absoluteUrl(`/packages/${p._id}`),
       lastModified: p.updatedAt,

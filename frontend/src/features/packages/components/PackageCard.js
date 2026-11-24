@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Card, CardBody } from 'reactstrap';
 import CompareToggle from './CompareToggle';
+import CloudImage from '@/components/common/CloudImage';
 import { ROOM_TYPE_LABELS } from '@/constants';
 import { formatCurrency, formatDateRange, formatDistance } from '@/utils/format';
 import styles from './PackageCard.module.scss';
@@ -30,15 +31,31 @@ export function SeatAvailability({ pkg }) {
   );
 }
 
-/** Catalogue card for a published package. */
-export default function PackageCard({ pkg }) {
+/**
+ * The package's cover photo (or a branded backdrop when it has none), with the agency name
+ * over it. Used at the top of catalogue cards.
+ */
+export function PackageCover({ pkg, sizes = '(min-width: 1200px) 400px, (min-width: 768px) 50vw, 100vw', showAgency = true }) {
+  return (
+    <div className={`${styles.cover} ${pkg.coverImage ? '' : styles.coverEmpty}`}>
+      {pkg.coverImage && <CloudImage src={pkg.coverImage.url} alt="" fill sizes={sizes} className={styles.coverImg} />}
+      <span className={styles.duration}>{pkg.durationDays} days</span>
+      {showAgency && pkg.agency && (
+        <div className={styles.coverAgency}>
+          <span className="text-truncate">{pkg.agency.businessName}</span>
+          <span className={styles.verified}>✓ Verified</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Catalogue card for a published package. `showAgency` is off on the agency's own page. */
+export default function PackageCard({ pkg, showAgency = true }) {
   return (
     <Card className={styles.card}>
+      <PackageCover pkg={pkg} showAgency={showAgency} />
       <CardBody className="p-4 d-flex flex-column">
-        <div className="small text-secondary mb-1">
-          {pkg.agency?.businessName}
-          {pkg.agency && <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified</span>}
-        </div>
         <h2 className="h5 mb-2">
           <Link href={`/packages/${pkg._id}`} className="stretched-link text-body text-decoration-none">
             {pkg.title}

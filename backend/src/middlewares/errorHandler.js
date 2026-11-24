@@ -13,7 +13,7 @@ function normalizeError(err) {
   if (err instanceof multer.MulterError) {
     const message =
       err.code === 'LIMIT_FILE_SIZE'
-        ? `File is too large. Maximum size is ${env.uploads.maxFileSizeMb} MB`
+        ? `File is too large. Maximum size is ${err.field === 'image' ? env.uploads.maxImageSizeMb : env.uploads.maxFileSizeMb} MB`
         : err.message;
     return ApiError.badRequest(message, { code: 'UPLOAD_ERROR' });
   }

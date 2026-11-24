@@ -1,0 +1,60 @@
+@import '../../../styles/variables';
+
+/* Banner with the package's cover photo behind the title */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 300px;
+  padding: 2rem;
+  overflow: hidden;
+  border-radius: $border-radius-xl;
+  background: $brand-green-dark;
+  color: #ffffff;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  h1 {
+    color: #ffffff;
+  }
+
+  @media (min-width: 992px) {
+    min-height: 380px;
+    padding: 2.5rem;
+  }
+
+  @media (max-width: 575.98px) {
+    min-height: 240px;
+    padding: 1.25rem;
+  }
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.hero .heroEyebrow {
+  color: $brand-gold-light;
+}
+
+.hero .heroLink {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: $brand-gold-light;
+  }
+}

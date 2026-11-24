@@ -7,4 +7,5 @@ module.exports = {
   AuditLog: require('./AuditLog'),
   Package: require('./Package'),
   Quotation: require('./Quotation'),
+  Review: require('./Review'),
 };
