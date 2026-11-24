@@ -48,7 +48,7 @@ async function listPublicReviews(agencyId, query) {
 /* ------------------------------------------------------------------ */
 
 async function setHeaderImage(user, agency, file) {
-  const image = await storage.saveImage(file.buffer, { folder: `agencies/${agency._id}/header` });
+  const image = await storage.saveImage(file.buffer, { folder: `agencies/${agency._id}` });
   const previous = agency.headerImage?.publicId;
   await Agency.updateOne({ _id: agency._id }, { $set: { headerImage: image } });
   if (previous) await storage.deleteImage(previous);

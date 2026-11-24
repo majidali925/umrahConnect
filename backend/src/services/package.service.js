@@ -177,7 +177,7 @@ async function deletePackage(user, agency, packageId) {
 /** Uploads a package's cover photo, replacing (and deleting) the previous one. */
 async function setCoverImage(user, agency, packageId, file) {
   const pkg = await findMyPackage(agency, packageId);
-  const image = await storage.saveImage(file.buffer, { folder: `agencies/${agency._id}/packages` });
+  const image = await storage.saveImage(file.buffer, { folder: `agencies/${agency._id}` });
   const previous = pkg.coverImage?.publicId;
   // Conditional on the package still existing, so a concurrent delete can't leave an orphan.
   const saved = await Package.findOneAndUpdate(
