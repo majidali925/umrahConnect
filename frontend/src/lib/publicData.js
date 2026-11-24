@@ -37,3 +37,20 @@ export async function listPublicPackages() {
   }
   return all;
 }
+
+const query = (params) =>
+  new URLSearchParams(Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)).toString();
+
+/** One page of the public catalogue as { data, meta }, for server-rendered listings. Throws if the API is down. */
+export async function browsePublicPackages(params = {}) {
+  cacheLife('minutes');
+  const body = await getJson(`/packages?${query(params)}`);
+  return { data: body?.data ?? [], meta: body?.meta ?? null };
+}
+
+/** Departure cities that currently have listed packages. Throws if the API is down. */
+export async function listDepartureCities() {
+  cacheLife('hours');
+  const body = await getJson('/packages/departure-cities');
+  return body?.data ?? [];
+}

@@ -9,7 +9,7 @@ const heading = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-headin
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'UmrahConnect — Compare Umrah packages from verified agencies in Pakistan',
+    default: 'Umrah Packages from Pakistan · Compare Verified Umrah Agencies | UmrahConnect',
     template: '%s · UmrahConnect',
   },
   description: SITE_DESCRIPTION,
@@ -18,6 +18,8 @@ export const metadata = {
     'Umrah packages',
     'Umrah packages from Pakistan',
     'Umrah package price',
+    'Umrah agency',
+    'Umrah agencies in Pakistan',
     'Umrah travel agency',
     'Umrah packages Lahore',
     'Umrah packages Karachi',

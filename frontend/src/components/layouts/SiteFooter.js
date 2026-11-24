@@ -10,12 +10,19 @@ export default function SiteFooter() {
           <div className="col-md-5">
             <BrandLogo size="sm" />
             <p className="text-secondary small mt-3 mb-0" style={{ maxWidth: 360 }}>
-              A trusted marketplace connecting Pakistani pilgrims with verified travel agencies and Umrah operators.
+              Compare Umrah packages from verified Umrah travel agencies across Pakistan — prices, hotels near the Haram
+              and what is included, in one place.
             </p>
           </div>
           <div className="col-6 col-md-3">
             <h6 className="fw-bold">Pilgrims</h6>
             <ul className="list-unstyled small mb-0">
+              <li className="mb-1">
+                <Link href="/packages">Browse Umrah packages</Link>
+              </li>
+              <li className="mb-1">
+                <Link href="/#faq">Umrah booking FAQ</Link>
+              </li>
               <li className="mb-1">
                 <Link href="/register">Create an account</Link>
               </li>
@@ -25,10 +32,10 @@ export default function SiteFooter() {
             </ul>
           </div>
           <div className="col-6 col-md-4">
-            <h6 className="fw-bold">Agencies & operators</h6>
+            <h6 className="fw-bold">For Umrah agencies</h6>
             <ul className="list-unstyled small mb-0">
               <li className="mb-1">
-                <Link href="/register/vendor">Register as a vendor</Link>
+                <Link href="/register/vendor">Register your agency</Link>
               </li>
               <li>
                 <Link href="/#for-agencies">Verification process</Link>

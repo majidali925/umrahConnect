@@ -6,7 +6,7 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:8
 export const SITE_NAME = 'UmrahConnect';
 
 export const SITE_DESCRIPTION =
-  'Compare Umrah packages from verified travel agencies across Pakistan. See prices, hotel distance from the Haram and what is included, then request seats online.';
+  'Compare Umrah packages from verified Umrah travel agencies in Pakistan. See prices, hotel distance from the Haram and what is included, then request seats online.';
 
 export const absoluteUrl = (path = '/') => `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 
@@ -16,3 +16,14 @@ export const baseOpenGraph = {
   locale: 'en_PK',
   type: 'website',
 };
+
+/** URL slug for a departure city: "Rahim Yar Khan" → "rahim-yar-khan". */
+export const citySlug = (city) =>
+  city
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+/** Landing page for Umrah packages departing from one city. */
+export const cityPath = (city) => `/umrah-packages/${citySlug(city)}`;

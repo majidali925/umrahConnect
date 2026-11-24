@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
 /**
  * List filters stored in the URL, so they survive reloads and can be linked to.
  * setParams({ key: value }) sets or (for empty values) removes keys, and resets to page 1
  * unless `page` itself is being changed.
+ *
+ * The URL changes through the History API, which Next keeps in sync with useSearchParams
+ * without a server round trip; lists refetch their own data.
  */
 export function useUrlParams() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -20,7 +22,8 @@ export function useUrlParams() {
     const params = new URLSearchParams(searchParams);
     Object.entries(updates).forEach(([key, value]) => (value ? params.set(key, value) : params.delete(key)));
     if (!('page' in updates)) params.delete('page');
-    router.replace(`${pathname}?${params}`, { scroll: false });
+    const qs = params.toString();
+    window.history.replaceState(null, '', qs ? `${pathname}?${qs}` : pathname);
   };
 
   return { get, page: Number(searchParams.get('page')) || 1, setParams };

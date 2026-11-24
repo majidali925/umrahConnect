@@ -30,8 +30,8 @@ export function SeatAvailability({ pkg }) {
   );
 }
 
-/** Catalogue card for a published package. */
-export default function PackageCard({ pkg }) {
+/** Catalogue card for a published package. `titleAs` sets the title's heading level to fit the page outline. */
+export default function PackageCard({ pkg, titleAs: Title = 'h2' }) {
   return (
     <Card className={styles.card}>
       <CardBody className="p-4 d-flex flex-column">
@@ -39,11 +39,11 @@ export default function PackageCard({ pkg }) {
           {pkg.agency?.businessName}
           {pkg.agency && <span className="badge rounded-pill badge-soft badge-soft-success ms-2">Verified</span>}
         </div>
-        <h2 className="h5 mb-2">
+        <Title className="h5 mb-2">
           <Link href={`/packages/${pkg._id}`} className="stretched-link text-body text-decoration-none">
             {pkg.title}
           </Link>
-        </h2>
+        </Title>
         <div className={`${styles.dates} mb-3`}>
           {formatDateRange(pkg.departureDate, pkg.returnDate)} · {pkg.durationDays} days
         </div>

@@ -10,6 +10,10 @@ const nextConfig = {
       (source) => ({ source, headers: noindex }),
     );
   },
+  async redirects() {
+    // The city pages live under /umrah-packages/<city>; the bare path is the full catalogue.
+    return [{ source: '/umrah-packages', destination: '/packages', permanent: true }];
+  },
   sassOptions: {
     // Bootstrap 5.3 still uses @import and legacy color functions; silence those
     // dependency warnings so real issues in our own styles stay visible.

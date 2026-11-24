@@ -1,8 +1,8 @@
 import { connection } from 'next/server';
-import { listPublicPackages } from '@/lib/publicData';
-import { absoluteUrl } from '@/lib/site';
+import { listPublicPackages, listDepartureCities } from '@/lib/publicData';
+import { absoluteUrl, cityPath } from '@/lib/site';
 
-// /sitemap.xml: the public pages plus every listed package.
+// /sitemap.xml: the public pages, a page per departure city and every listed package.
 export default async function sitemap() {
   // Built per request (the package list itself is cached for hours), so a build
   // without the API reachable never freezes an empty sitemap.
@@ -15,15 +15,15 @@ export default async function sitemap() {
     { url: absoluteUrl('/register'), changeFrequency: 'monthly', priority: 0.3 },
   ];
 
-  let packages = [];
-  try {
-    packages = await listPublicPackages();
-  } catch {
-    // API unavailable: still serve the static pages.
-  }
+  // API unavailable: still serve the static pages.
+  const [packages, cities] = await Promise.all([
+    listPublicPackages().catch(() => []),
+    listDepartureCities().catch(() => []),
+  ]);
 
   return [
     ...pages,
+    ...cities.map((city) => ({ url: absoluteUrl(cityPath(city)), changeFrequency: 'daily', priority: 0.85 })),
     ...packages.map((p) => ({
       url: absoluteUrl(`/packages/${p._id}`),
       lastModified: p.updatedAt,
