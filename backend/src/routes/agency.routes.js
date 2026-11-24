@@ -3,7 +3,8 @@ const controller = require('../controllers/agency.controller');
 const validate = require('../middlewares/validate');
 const { authenticate, authorize } = require('../middlewares/auth');
 const { loadMyAgency, requireEditableAgency, requireApprovedAgency } = require('../middlewares/agency');
-const { documentUpload, verifyFileSignature, cleanupUploadOnError } = require('../middlewares/upload');
+const { documentUpload, imageUpload, verifyFileSignature, requireFile } = require('../middlewares/upload');
+const vendorController = require('../controllers/vendor.controller');
 const packageController = require('../controllers/package.controller');
 const schemas = require('../validators/agency.validator');
 const packageSchemas = require('../validators/package.validator');
@@ -24,17 +25,21 @@ router.get('/verification-status', controller.getVerificationStatus);
 router.post(
   '/documents',
   loadMyAgency,
-  requireEditableAgency, // checked before multer so nothing is written to disk otherwise
+  requireEditableAgency, // checked before multer so the file body is never read otherwise
   documentUpload.single('file'),
   verifyFileSignature,
   validate(schemas.uploadDocument),
   controller.uploadDocument,
-  cleanupUploadOnError,
 );
 router.get('/documents/:documentId/file', validate(schemas.documentIdParam, 'params'), controller.viewDocument);
 router.delete('/documents/:documentId', validate(schemas.documentIdParam, 'params'), controller.deleteDocument);
 
 router.get('/publishing-access', loadMyAgency, requireApprovedAgency, controller.getPublishingAccess);
+
+// Public photos (multipart field "image", JPG/PNG/WebP up to 5 MB), approved agencies only.
+const photoUpload = [imageUpload.single('image'), verifyFileSignature, requireFile('Please choose a photo to upload')];
+router.put('/me/header-image', loadMyAgency, requireApprovedAgency, photoUpload, vendorController.setHeaderImage);
+router.delete('/me/header-image', loadMyAgency, requireApprovedAgency, vendorController.removeHeaderImage);
 
 // Packages and seat requests: approved agencies only, always scoped to req.agency.
 const approved = [loadMyAgency, requireApprovedAgency];
@@ -60,6 +65,8 @@ router.patch(
   packageController.setStatus,
 );
 router.delete('/packages/:packageId', approved, byPackage, packageController.remove);
+router.put('/packages/:packageId/cover-image', approved, byPackage, photoUpload, vendorController.setCoverImage);
+router.delete('/packages/:packageId/cover-image', approved, byPackage, vendorController.removeCoverImage);
 
 router.get('/quotations', approved, validate(packageSchemas.listQuotations, 'query'), packageController.listAgencyQuotations);
 router.patch(

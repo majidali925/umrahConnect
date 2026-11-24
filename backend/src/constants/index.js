@@ -129,6 +129,8 @@ const AUDIT_ACTIONS = Object.freeze({
   QUOTATION_CONFIRMED: 'QUOTATION_CONFIRMED',
   QUOTATION_DECLINED: 'QUOTATION_DECLINED',
   QUOTATION_CANCELLED: 'QUOTATION_CANCELLED',
+  REVIEW_SUBMITTED: 'REVIEW_SUBMITTED',
+  REVIEW_UPDATED: 'REVIEW_UPDATED',
 });
 
 const ENTITY_TYPES = Object.freeze({
@@ -138,6 +140,7 @@ const ENTITY_TYPES = Object.freeze({
   AGENCY_DOCUMENT: 'AgencyDocument',
   PACKAGE: 'Package',
   QUOTATION: 'Quotation',
+  REVIEW: 'Review',
 });
 
 const PACKAGE_STATUS = Object.freeze({
@@ -185,6 +188,8 @@ const PAKISTAN_PROVINCES = [
 ];
 
 const ALLOWED_UPLOAD_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+// Public photos: agency header photos and package cover photos.
+const ALLOWED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 module.exports = {
   ROLES,
@@ -203,6 +208,7 @@ module.exports = {
   ENTITY_TYPES,
   PAKISTAN_PROVINCES,
   ALLOWED_UPLOAD_MIME_TYPES,
+  ALLOWED_IMAGE_MIME_TYPES,
   PACKAGE_STATUS,
   ROOM_TYPES,
   PACKAGE_INCLUSIONS,

@@ -1,4 +1,5 @@
 import apiClient, { unwrap } from './apiClient';
+import { uploadImage } from './agency.service';
 
 // Drop empty filters so "All" options don't send e.g. "?status=".
 const clean = (params = {}) =>
@@ -12,6 +13,9 @@ export const agencyPackageService = {
   update: (id, payload) => unwrap(apiClient.put(`/agencies/packages/${id}`, payload)),
   setStatus: (id, status) => unwrap(apiClient.patch(`/agencies/packages/${id}/status`, { status })),
   remove: (id) => unwrap(apiClient.delete(`/agencies/packages/${id}`)),
+  /** Cover photo shown behind the package on cards and its page. */
+  uploadCoverImage: (id, file, onProgress) => uploadImage(`/agencies/packages/${id}/cover-image`, file, onProgress),
+  removeCoverImage: (id) => unwrap(apiClient.delete(`/agencies/packages/${id}/cover-image`)),
   /** Hotels near the Haram of 'MAKKAH' or 'MADINAH', each with its distanceMeters from the mosque. */
   searchHotels: (city, q) => unwrap(apiClient.get('/agencies/hotels/search', { params: { city, q } })),
 
@@ -30,4 +34,12 @@ export const packageService = {
   requestSeats: (id, payload) => unwrap(apiClient.post(`/packages/${id}/quotations`, payload)),
   myQuotations: (params) => unwrap(apiClient.get('/quotations', { params: clean(params) })),
   withdrawQuotation: (id) => unwrap(apiClient.patch(`/quotations/${id}/cancel`)),
+  /** Rate the agency after a completed trip; creates or updates the customer's review. */
+  submitReview: (quotationId, payload) => unwrap(apiClient.put(`/quotations/${quotationId}/review`, payload)),
+};
+
+/** Public agency pages. An agency's packages come from packageService.browse({ agencyId }). */
+export const vendorService = {
+  get: (agencyId) => unwrap(apiClient.get(`/vendors/${agencyId}`)),
+  reviews: (agencyId, params) => unwrap(apiClient.get(`/vendors/${agencyId}/reviews`, { params: clean(params) })),
 };

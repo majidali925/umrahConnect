@@ -59,6 +59,8 @@ Edit `backend/.env`:
 | `COOKIE_SAMESITE`, `COOKIE_SECURE` | Refresh-cookie settings (see *Deployment notes*) |
 | `OTP_EXPIRES_IN_MINUTES`, `OTP_MAX_ATTEMPTS`, `OTP_RESEND_COOLDOWN_SECONDS` | OTP tuning (defaults 10 / 5 / 60) |
 | `UPLOAD_MAX_FILE_SIZE_MB` | Document upload limit (default 5) |
+| `UPLOAD_MAX_IMAGE_SIZE_MB` | Header/cover photo upload limit (default 5) |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | File storage. Every upload is stored privately (`authenticated` raw assets) under `CLOUDINARY_FOLDER` (default `umrahconnect`). Required in production; left empty in development, files go to `backend/uploads/`. |
 | `AUTH_RATE_LIMIT_MAX` | Login/register/OTP attempts per IP per 15 min (default 20). Admin login gets half of this, minimum 5 |
 | `GEOCODER_URL`, `GEOCODER_USER_AGENT` | Optional. Hotel search on the package form, which fills in each hotel's distance from the Haram, uses OpenStreetMap Nominatim (default `https://nominatim.openstreetmap.org`). The public server allows one request per second and requires an identifying User-Agent, ideally with a contact URL. Point `GEOCODER_URL` at a self-hosted Nominatim for heavy use |
 
@@ -158,7 +160,7 @@ umrah-connect/
 │   │   ├── app.js         Express app (helmet, CORS, parsers, routes, error handler)
 │   │   └── server.js      bootstrap + graceful shutdown
 │   ├── tests/             node:test + supertest integration suites
-│   ├── uploads/           private document storage (git-ignored, never served statically)
+│   ├── uploads/           local fallback storage when Cloudinary is not configured (git-ignored)
 │   └── .env.example
 ├── frontend/
 │   ├── src/
@@ -229,12 +231,16 @@ Every response uses the same envelope:
 | DELETE | `/documents/:documentId` | Remove a document (only while editable) |
 | GET | `/verification-status` | Status, reasons, per-category verification, `canPublish` |
 | GET | `/publishing-access` | Succeeds only for `APPROVED` vendors |
+| PUT | `/me/header-image` | `APPROVED` only. Header photo for your public page (`multipart/form-data`: `image`; JPG/PNG/WebP, max 5 MB). Replaces the old photo |
+| DELETE | `/me/header-image` | Remove the header photo |
 | GET | `/packages` | Your packages with seat and request counts; filters `status`, `search` |
 | POST | `/packages` | Create a package (`status` `DRAFT` or `PUBLISHED`). Departure must be in the future, return after departure |
 | GET | `/packages/:packageId` | One of your packages |
 | PUT | `/packages/:packageId` | Replace a package. Quota can't drop below confirmed seats; dates are locked once seats are confirmed |
 | PATCH | `/packages/:packageId/status` | Publish (`PUBLISHED`) or unpublish (`DRAFT`) |
 | DELETE | `/packages/:packageId` | Delete (refused while requests are pending or bookings are confirmed) |
+| PUT | `/packages/:packageId/cover-image` | Cover photo shown behind the package (`multipart/form-data`: `image`; JPG/PNG/WebP, max 5 MB) |
+| DELETE | `/packages/:packageId/cover-image` | Remove the cover photo |
 | GET | `/quotations` | Seat requests on your packages; filters `status`, `packageId`; `meta.statusCounts` |
 | PATCH | `/quotations/:quotationId/confirm` | Confirm a pending request and reserve its seats (atomic; never exceeds the quota) |
 | PATCH | `/quotations/:quotationId/decline` | Decline a pending request with a required `reason` |
@@ -259,6 +265,16 @@ Only published packages with a future departure from currently approved agencies
 | --- | --- | --- |
 | GET | `/` | Your requests. The agency's contact details are included once a request is confirmed |
 | PATCH | `/:quotationId/cancel` | Withdraw a pending request |
+| PUT | `/:quotationId/review` | Rate the agency (`rating` 1–5, optional `comment`) once a confirmed booking's trip has ended. One review per booking; sending again edits it |
+
+### Agency pages (public): `/api/v1/vendors`
+
+Approved agencies only (others are 404). Their packages come from `GET /packages?agencyId=`.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | `/:agencyId` | Public profile: name, description, city, experience, header photo, rating summary (`average`, `count`, `distribution`) and `packageCount`. No contact details |
+| GET | `/:agencyId/reviews` | Reviews, newest first (`page`, `limit` ≤ 50). Reviewers are shown as first name + last initial |
 
 ### Admin auth: `/api/v1/admin/auth`
 
@@ -322,7 +338,7 @@ Each document is reviewed on its own, and verification is reported separately fo
 - Admins are fully isolated from marketplace users: separate collection, login endpoint, JWT secrets and audience, refresh cookie (name and path), CORS allow-list, frontend app, and a stricter login rate limit. Admin sign-ins are audit-logged and the admin panel is marked `noindex`.
 - Joi validation with unknown-field stripping on every request body and query. This also blocks NoSQL operator injection.
 - Rate limiting on auth endpoints, Helmet headers, a CORS allow-list with credentials, and a 100 kB JSON body limit.
-- Uploads: PDF/JPG/PNG only, size limit, **magic-byte check**, random file names, stored outside any public directory and streamed only to the owner or an admin with `no-store` and `nosniff` headers.
+- Uploads: PDF/JPG/PNG only, size limit, **magic-byte check**, random file names, stored as private Cloudinary assets under `umrahconnect/` (no public URL) and streamed through the API only to the owner or an admin with `no-store` and `nosniff` headers.
 - No account enumeration on login, forgot-password or resend-OTP.
 
 ## Deployment notes

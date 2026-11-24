@@ -24,5 +24,6 @@ router.use('/auth', require('./auth.routes'));
 router.use('/agencies', require('./agency.routes'));
 router.use('/packages', require('./package.routes'));
 router.use('/quotations', require('./quotation.routes'));
+router.use('/vendors', require('./vendor.routes'));
 
 module.exports = router;

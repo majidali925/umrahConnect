@@ -2,7 +2,8 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { Alert } from 'reactstrap';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import { LoadingState, ErrorState } from '@/components/common/States';
@@ -14,6 +15,7 @@ import { useFetch } from '@/hooks/useFetch';
 function EditPackage() {
   const { id } = useParams();
   const router = useRouter();
+  const photoFailed = useSearchParams().get('photo') === 'failed';
   const { data: pkg, loading, error, reload } = useFetch(() => agencyPackageService.get(id), [id]);
 
   if (loading && !pkg) return <LoadingState label="Loading package…" />;
@@ -45,6 +47,11 @@ function EditPackage() {
           </>
         }
       />
+      {photoFailed && (
+        <Alert color="warning" fade={false}>
+          Your package was saved, but its cover photo could not be uploaded. Please try again below.
+        </Alert>
+      )}
       <PackageForm initialPackage={pkg} bookedSeats={pkg.bookedSeats} onSubmit={handleSubmit} />
     </>
   );

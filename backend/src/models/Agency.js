@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { imageSchema, imageToJSON } = require('./imageSchema');
 const { VENDOR_TYPES, AGENCY_STATUS } = require('../constants');
 
 // Business fields are optional while the application is a DRAFT (filled step by step)
@@ -46,12 +47,16 @@ const agencySchema = new mongoose.Schema(
     approvedAt: { type: Date },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
     suspendedAt: { type: Date },
+
+    // Banner photo shown at the top of the agency's public page.
+    headerImage: { type: imageSchema },
   },
   {
     timestamps: true,
     toJSON: {
       transform(_doc, ret) {
         delete ret.__v;
+        ret.headerImage = imageToJSON(ret.headerImage);
         return ret;
       },
     },

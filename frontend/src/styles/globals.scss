@@ -47,6 +47,10 @@ a {
   background-color: $brand-green-light !important;
 }
 
+.bg-gold-light {
+  background-color: $brand-gold-light !important;
+}
+
 .btn-gold {
   @include button-variant($brand-gold, $brand-gold, $color: #fff, $hover-background: darken($brand-gold, 6%), $hover-border: darken($brand-gold, 6%), $hover-color: #fff);
 }

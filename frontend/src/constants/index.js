@@ -84,6 +84,13 @@ export const UPLOAD = {
   mimeTypes: ['application/pdf', 'image/jpeg', 'image/png'],
 };
 
+// Public photos: agency header photo and package cover photos.
+export const IMAGE_UPLOAD = {
+  maxSizeMb: 5,
+  accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp',
+  mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+};
+
 /* ---------------- Packages & seat requests ---------------- */
 
 // EXPIRED is derived on the client from package.isExpired, not stored.

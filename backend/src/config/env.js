@@ -22,6 +22,16 @@ const parseOrigins = (value, fallback) =>
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
+// Cloudinary is all-or-nothing: a partial configuration is always a mistake.
+const CLOUDINARY_KEYS = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
+const cloudinarySet = CLOUDINARY_KEYS.filter((key) => process.env[key]);
+if (cloudinarySet.length && cloudinarySet.length !== CLOUDINARY_KEYS.length) {
+  throw new Error(`Set all of ${CLOUDINARY_KEYS.join(', ')} or none of them`);
+}
+if (!cloudinarySet.length && nodeEnv === 'production') {
+  throw new Error(`File storage is not configured: set ${CLOUDINARY_KEYS.join(', ')}`);
+}
+
 const env = {
   nodeEnv,
   isProduction: nodeEnv === 'production',
@@ -71,8 +81,20 @@ const env = {
     userAgent: process.env.GEOCODER_USER_AGENT || 'UmrahConnect/1.0 (hotel distance lookup)',
   },
   uploads: {
+    // Local disk storage: used only when Cloudinary is not configured (tests, offline dev),
+    // and for reading documents uploaded before the move to Cloudinary.
     dir: path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')),
     maxFileSizeMb: Number(process.env.UPLOAD_MAX_FILE_SIZE_MB) || 5,
+    // Agency header photos and package cover photos.
+    maxImageSizeMb: Number(process.env.UPLOAD_MAX_IMAGE_SIZE_MB) || 5,
+  },
+  cloudinary: {
+    enabled: cloudinarySet.length === CLOUDINARY_KEYS.length,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+    // Every file this project uploads is stored under this Cloudinary folder.
+    rootFolder: (process.env.CLOUDINARY_FOLDER || 'umrahconnect').replace(/^\/+|\/+$/g, ''),
   },
 };
 

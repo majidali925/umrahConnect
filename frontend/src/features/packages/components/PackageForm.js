@@ -6,7 +6,9 @@ import { Formik, Form, useField, getIn } from 'formik';
 import { Card, CardBody, Row, Col, FormGroup, Input, Label, Button, Spinner } from 'reactstrap';
 import FormField from '@/components/forms/FormField';
 import FormAlert from '@/components/forms/FormAlert';
+import ImageUploader from '@/components/forms/ImageUploader';
 import HotelNameField from './HotelNameField';
+import { agencyPackageService } from '@/services/package.service';
 import { packageSchema } from '@/utils/validation';
 import { applyServerErrors, getErrorMessage } from '@/utils/errors';
 import { formatCurrency, toDateInput, tomorrowInput } from '@/utils/format';
@@ -47,6 +49,46 @@ export function packageToValues(pkg) {
     inclusions: pkg.inclusions || [],
     totalSeats: pkg.totalSeats,
   };
+}
+
+/**
+ * Cover photo shown behind the package on cards and at the top of its page. An existing
+ * package uploads straight away; a new one keeps the file until the package is created.
+ */
+function CoverPhotoCard({ pkg, onSelect }) {
+  const [coverUrl, setCoverUrl] = useState(pkg?.coverImage?.url || null);
+  return (
+    <Card className="mb-4">
+      <CardBody className="p-4">
+        <h2 className="h6 section-title mb-1">Cover photo</h2>
+        <p className="small text-secondary mb-3">
+          Shown behind your package in the catalogue and at the top of its page. A landscape photo of your hotel or
+          the Haram works best.{pkg ? '' : ' It is uploaded when you save the package.'}
+        </p>
+        <Row>
+          <Col md={8} lg={6}>
+            {pkg ? (
+              <ImageUploader
+                imageUrl={coverUrl}
+                emptyLabel="No cover photo yet"
+                sizes="(min-width: 992px) 420px, 100vw"
+                onUpload={async (file, onProgress) => {
+                  const res = await agencyPackageService.uploadCoverImage(pkg._id, file, onProgress);
+                  setCoverUrl(res.data.coverImage?.url || null);
+                }}
+                onRemove={async () => {
+                  await agencyPackageService.removeCoverImage(pkg._id);
+                  setCoverUrl(null);
+                }}
+              />
+            ) : (
+              <ImageUploader emptyLabel="No cover photo yet" onSelect={onSelect} />
+            )}
+          </Col>
+        </Row>
+      </CardBody>
+    </Card>
+  );
 }
 
 function InclusionCheckbox({ value, label }) {
@@ -110,6 +152,8 @@ export default function PackageForm({ initialPackage, bookedSeats = 0, onSubmit,
   const isEdit = Boolean(initialPackage);
   const [error, setError] = useState(null);
   const publishIntent = useRef(false);
+  // New packages only: the picked cover photo, uploaded by the page once the package exists.
+  const coverFile = useRef(null);
   const datesLocked = isEdit && bookedSeats > 0;
 
   const handleSubmit = async (values, { setErrors }) => {
@@ -119,7 +163,7 @@ export default function PackageForm({ initialPackage, bookedSeats = 0, onSubmit,
     // not shifted by the browser's timezone.
     const payload = { ...cast, departureDate: values.departureDate, returnDate: values.returnDate };
     try {
-      await onSubmit(payload, { publish: publishIntent.current });
+      await onSubmit(payload, { publish: publishIntent.current, coverFile: coverFile.current });
     } catch (err) {
       if (!applyServerErrors(err, setErrors)) setError(getErrorMessage(err));
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -184,6 +228,13 @@ export default function PackageForm({ initialPackage, bookedSeats = 0, onSubmit,
                 )}
               </CardBody>
             </Card>
+
+            <CoverPhotoCard
+              pkg={initialPackage}
+              onSelect={(file) => {
+                coverFile.current = file;
+              }}
+            />
 
             <Card className="mb-4">
               <CardBody className="p-4">
