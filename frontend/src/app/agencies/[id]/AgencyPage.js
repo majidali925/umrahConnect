@@ -7,6 +7,7 @@ import { Card, CardBody, Row, Col } from 'reactstrap';
 import CloudImage from '@/components/common/CloudImage';
 import Pagination from '@/components/common/Pagination';
 import { StarRating } from '@/components/common/StarRating';
+import VerifiedBadge from '@/components/common/VerifiedBadge';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
 import PackageCard from '@/features/packages/components/PackageCard';
 import CompareTray from '@/features/packages/components/CompareTray';
@@ -53,7 +54,7 @@ function Hero({ agency }) {
         <div className="min-w-0">
           <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
             <h1 className={`${styles.heroTitle} mb-0`}>{agency.businessName}</h1>
-            <span className={styles.verified}>✓ Verified</span>
+            <VerifiedBadge size={28} />
           </div>
           <div className={styles.heroMeta}>
             {place && <span>{place}</span>}
