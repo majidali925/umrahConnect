@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { imageSchema, imageToJSON } = require('./imageSchema');
 const { PACKAGE_STATUS, ROOM_TYPES, PACKAGE_INCLUSIONS } = require('../constants');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -40,6 +41,9 @@ const packageSchema = new mongoose.Schema(
 
     status: { type: String, enum: Object.values(PACKAGE_STATUS), default: PACKAGE_STATUS.DRAFT, required: true },
     publishedAt: { type: Date },
+
+    // Photo shown behind the package on cards and at the top of the package page.
+    coverImage: { type: imageSchema },
   },
   {
     timestamps: true,
@@ -48,6 +52,7 @@ const packageSchema = new mongoose.Schema(
       transform(_doc, ret) {
         delete ret.__v;
         delete ret.id;
+        ret.coverImage = imageToJSON(ret.coverImage);
         return ret;
       },
     },

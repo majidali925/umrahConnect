@@ -6,7 +6,9 @@ import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import VerificationChecklist from '@/components/common/VerificationChecklist';
 import { LoadingState } from '@/components/common/States';
+import ImageUploader from '@/components/forms/ImageUploader';
 import AgencyStatusGate from '@/features/agency/components/AgencyStatusGate';
+import { useAgency } from '@/features/agency/AgencyContext';
 import ApplicationSummary from '@/features/agency/components/ApplicationSummary';
 import { agencyService } from '@/services/agency.service';
 import { useFetch } from '@/hooks/useFetch';
@@ -43,6 +45,41 @@ function PublishingAccess() {
   );
 }
 
+/** Header photo for the public agency page, plus a link to see that page. */
+function PublicPageCard({ agency }) {
+  const { reload } = useAgency();
+  return (
+    <Card className="mb-4">
+      <CardBody className="p-4">
+        <div className="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-1">
+          <h2 className="h6 section-title mb-0">Your public page</h2>
+          <Link href={`/agencies/${agency._id}`} className="small fw-semibold" target="_blank">
+            View public page ↗
+          </Link>
+        </div>
+        <p className="small text-secondary mb-3">
+          Customers see your header photo, your published packages and their reviews on your agency page. Use a wide,
+          landscape photo (at least 1600 px wide) — e.g. your office, a past group or the Haram.
+        </p>
+        <ImageUploader
+          imageUrl={agency.headerImage?.url}
+          aspectRatio="16 / 5"
+          sizes="(min-width: 992px) 720px, 100vw"
+          emptyLabel="No header photo yet"
+          onUpload={async (file, onProgress) => {
+            await agencyService.uploadHeaderImage(file, onProgress);
+            await reload();
+          }}
+          onRemove={async () => {
+            await agencyService.removeHeaderImage();
+            await reload();
+          }}
+        />
+      </CardBody>
+    </Card>
+  );
+}
+
 export default function AgencyProfilePage() {
   return (
     <AgencyStatusGate>
@@ -58,6 +95,7 @@ export default function AgencyProfilePage() {
           />
           <Row className="g-4">
             <Col lg={8}>
+              {agency.verificationStatus === 'APPROVED' && <PublicPageCard agency={agency} />}
               <Card>
                 <CardBody className="p-4">
                   <ApplicationSummary agency={agency} />

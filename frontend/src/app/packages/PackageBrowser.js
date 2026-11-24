@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardBody, Input, Row, Col, Label, Button, Alert } from 'reactstrap';
 import Pagination from '@/components/common/Pagination';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
@@ -50,7 +51,8 @@ export default function PackageBrowser({ initial }) {
       {filters.agencyId && (
         <Alert color="success" fade={false} className="d-flex flex-wrap justify-content-between align-items-center gap-2">
           <span>
-            Showing packages from <strong>{agencyName}</strong>
+            Showing packages from <strong>{agencyName}</strong> ·{' '}
+            <Link href={`/agencies/${filters.agencyId}`}>View agency page &amp; reviews</Link>
           </span>
           <Button color="link" size="sm" className="p-0" onClick={() => setParams({ agencyId: '' })}>
             Show all packages

@@ -21,9 +21,13 @@ export default async function sitemap() {
     listDepartureCities().catch(() => []),
   ]);
 
+  // Every agency with at least one listed package has a public page worth indexing.
+  const agencies = [...new Set(packages.map((p) => p.agency?._id).filter(Boolean))];
+
   return [
     ...pages,
     ...cities.map((city) => ({ url: absoluteUrl(cityPath(city)), changeFrequency: 'daily', priority: 0.85 })),
+    ...agencies.map((id) => ({ url: absoluteUrl(`/agencies/${id}`), changeFrequency: 'weekly', priority: 0.7 })),
     ...packages.map((p) => ({
       url: absoluteUrl(`/packages/${p._id}`),
       lastModified: p.updatedAt,

@@ -25,6 +25,14 @@ export async function getPublicPackage(id) {
   return body?.data ?? null;
 }
 
+/** An approved agency's public profile, or null when it doesn't exist or isn't approved. */
+export async function getPublicAgency(id) {
+  cacheLife('minutes');
+  if (!OBJECT_ID.test(id)) return null;
+  const body = await getJson(`/vendors/${id}`);
+  return body?.data ?? null;
+}
+
 /** Every publicly listed package (id and dates only matter), for the sitemap. */
 export async function listPublicPackages() {
   cacheLife('hours');
