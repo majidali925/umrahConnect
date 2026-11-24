@@ -25,3 +25,4 @@ backend/uploads/*
 npm-debug.log*
 .DS_Store
 coverage/
+marketing/
