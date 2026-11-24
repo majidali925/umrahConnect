@@ -133,7 +133,7 @@ describe('Agency pages, photos and reviews', () => {
       const first = await upload(vendor.token, url, h.PNG, 'banner.png', 'image/png');
       assert.equal(first.status, 200);
       assert.match(first.body.data.headerImage.url, /^https:\/\/res\.cloudinary\.com\//);
-      assert.equal(fake.saved[0], `umrahconnect/agencies/${vendor.agency._id}/header/img1`);
+      assert.equal(fake.saved[0], `umrahconnect/agencies/${vendor.agency._id}/img1`);
 
       const second = await upload(vendor.token, url, WEBP, 'banner.webp', 'image/webp');
       assert.equal(second.status, 200);
@@ -158,7 +158,7 @@ describe('Agency pages, photos and reviews', () => {
 
       const res = await upload(vendor.token, url, h.PNG, 'cover.png', 'image/png');
       assert.equal(res.status, 200);
-      assert.equal(fake.saved.at(-1), `umrahconnect/agencies/${vendor.agency._id}/packages/img${fake.saved.length}`);
+      assert.equal(fake.saved.at(-1), `umrahconnect/agencies/${vendor.agency._id}/img${fake.saved.length}`);
 
       // Editing the package keeps its cover photo.
       await h.api().put(`/api/v1/agencies/packages/${packageId}`).set(auth(vendor.token)).send(PACKAGE());
