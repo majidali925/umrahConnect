@@ -79,7 +79,7 @@ export default function LoginForm() {
         New to UmrahConnect? <Link href="/register" className="fw-semibold">Create an account</Link>
       </p>
       <p className="text-center small text-secondary mb-0">
-        Travel agency or operator? <Link href="/register/vendor" className="fw-semibold">Register as a vendor</Link>
+        Travel agency? <Link href="/register/vendor" className="fw-semibold">Register your agency</Link>
       </p>
     </>
   );

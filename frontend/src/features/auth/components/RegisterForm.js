@@ -9,16 +9,15 @@ import FormField from '@/components/forms/FormField';
 import PasswordField from '@/components/forms/PasswordField';
 import SubmitButton from '@/components/forms/SubmitButton';
 import FormAlert from '@/components/forms/FormAlert';
-import ChoiceCards from '@/components/forms/ChoiceCards';
 import { authService } from '@/services/auth.service';
-import { ROLES, VENDOR_TYPE_OPTIONS } from '@/constants';
+import { ROLES, VENDOR_TYPES } from '@/constants';
 import { applyServerErrors, getErrorMessage } from '@/utils/errors';
 import { email, password, confirmPassword, pakistaniMobile } from '@/utils/validation';
 import styles from './RegisterForm.module.scss';
 
 /**
- * Registration for customers (role CUSTOMER) and vendors (role AGENCY with a vendor type).
- * Vendor type is a property of the agency, not a separate login role.
+ * Registration for customers (role CUSTOMER) and vendors (role AGENCY).
+ * Only registered travel agencies can sign up as vendors for now, so the vendor type is fixed.
  */
 export default function RegisterForm({ role }) {
   const router = useRouter();
@@ -31,7 +30,6 @@ export default function RegisterForm({ role }) {
     phone: pakistaniMobile(),
     password,
     confirmPassword,
-    ...(isVendor ? { vendorType: Yup.string().required('Select how you operate') } : {}),
   });
 
   const initialValues = {
@@ -40,13 +38,16 @@ export default function RegisterForm({ role }) {
     phone: '',
     password: '',
     confirmPassword: '',
-    ...(isVendor ? { vendorType: '' } : {}),
   };
 
   const handleSubmit = async (values, { setErrors }) => {
     setError(null);
     try {
-      const { data } = await authService.register({ ...values, role });
+      const { data } = await authService.register({
+        ...values,
+        role,
+        ...(isVendor ? { vendorType: VENDOR_TYPES.REGISTERED_AGENCY } : {}),
+      });
       const params = new URLSearchParams({ identifier: values.email.trim(), sentTo: data.verification.destination });
       router.push(`/verify-otp?${params}`);
     } catch (err) {
@@ -61,14 +62,14 @@ export default function RegisterForm({ role }) {
           Pilgrim
         </Link>
         <Link href="/register/vendor" className={isVendor ? styles.active : ''} role="tab" aria-selected={isVendor}>
-          Agency / Operator
+          Travel Agency
         </Link>
       </div>
 
       <h1 className="h3 mb-1">{isVendor ? 'Register your business' : 'Create your account'}</h1>
       <p className="text-secondary mb-4">
         {isVendor
-          ? 'Create a vendor account, then complete onboarding for verification.'
+          ? 'Create an agency account, then complete onboarding for verification.'
           : 'Join UmrahConnect to explore verified Umrah agencies.'}
       </p>
 
@@ -77,7 +78,6 @@ export default function RegisterForm({ role }) {
       <Formik initialValues={initialValues} validationSchema={schema} onSubmit={handleSubmit}>
         {({ isSubmitting }) => (
           <Form noValidate>
-            {isVendor && <ChoiceCards name="vendorType" label="How do you operate?" options={VENDOR_TYPE_OPTIONS} />}
             <FormField
               name="fullName"
               label={isVendor ? 'Your full name (account owner)' : 'Full name'}
@@ -92,14 +92,8 @@ export default function RegisterForm({ role }) {
               placeholder="0300 1234567"
               help="Pakistani mobile number"
             />
-            <div className="row">
-              <div className="col-sm-6">
-                <PasswordField name="password" autoComplete="new-password" help="8+ characters, letters and numbers" />
-              </div>
-              <div className="col-sm-6">
-                <PasswordField name="confirmPassword" label="Confirm password" autoComplete="new-password" />
-              </div>
-            </div>
+            <PasswordField name="password" autoComplete="new-password" help="8+ characters, letters and numbers" />
+            <PasswordField name="confirmPassword" label="Confirm password" autoComplete="new-password" />
             <SubmitButton loading={isSubmitting} block loadingText="Creating account…">
               Create account
             </SubmitButton>

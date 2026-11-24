@@ -1,9 +1,8 @@
 'use client';
 
 import FormField from '@/components/forms/FormField';
-import ChoiceCards from '@/components/forms/ChoiceCards';
 import StepForm from './StepForm';
-import { VENDOR_TYPE_OPTIONS, PAKISTAN_PROVINCES } from '@/constants';
+import { PAKISTAN_PROVINCES } from '@/constants';
 import { businessInfoSchema, contactInfoSchema, addressSchema } from '@/utils/validation';
 
 /** +923001234567 → 03001234567 for friendlier editing; the API normalizes again on save. */
@@ -23,7 +22,6 @@ export function BusinessInfoStep({ agency, onSaved }) {
       onSaved={onSaved}
     >
       <FormField name="businessName" label="Business name" placeholder="e.g. Al-Noor Travels" />
-      <ChoiceCards name="vendorType" label="Vendor type" options={VENDOR_TYPE_OPTIONS} />
       <div className="row">
         <div className="col-md-8">
           <FormField name="ownerName" label="Owner name" />
