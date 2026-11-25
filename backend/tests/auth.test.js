@@ -214,20 +214,13 @@ describe('Authentication', () => {
       assert.equal(unknown.body.message, known.body.message, 'must not reveal account existence');
     });
 
-    it('supports phone verification via SMS OTP', async () => {
-      const resend = await h
+    it('refuses SMS codes (no SMS gateway yet)', async () => {
+      const res = await h
         .api()
         .post('/api/v1/auth/resend-otp')
         .send({ identifier: user.email, purpose: 'PHONE_VERIFICATION' });
-      assert.equal(resend.status, 200);
-      assert.equal(resend.body.data.channel, 'sms');
-      const verify = await h.api().post('/api/v1/auth/verify-otp').send({
-        identifier: user.email,
-        purpose: 'PHONE_VERIFICATION',
-        otp: h.latestOtp('+923007654321'),
-      });
-      assert.equal(verify.status, 200);
-      assert.equal(verify.body.data.user.isPhoneVerified, true);
+      assert.equal(res.status, 400);
+      assert.equal(res.body.code, 'SMS_UNAVAILABLE');
     });
   });
 });
