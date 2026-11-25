@@ -63,6 +63,10 @@ export const CATEGORY_STATUS_META = {
   NOT_PROVIDED: { label: 'Not provided', color: 'secondary' },
 };
 
+// No SMS gateway yet: SMS verification options are hidden across the site. Set to true (together
+// with SMS_ENABLED=true in the backend .env) once an SMS provider is connected.
+export const SMS_ENABLED = false;
+
 export const OTP_PURPOSES = {
   EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
   PHONE_VERIFICATION: 'PHONE_VERIFICATION',

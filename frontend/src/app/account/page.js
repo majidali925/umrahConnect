@@ -6,6 +6,7 @@ import PageHeader from '@/components/common/PageHeader';
 import DetailList from '@/components/common/DetailList';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDate, formatPhone } from '@/utils/format';
+import { SMS_ENABLED } from '@/constants';
 
 export default function AccountPage() {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ export default function AccountPage() {
                   { label: 'Mobile number', value: formatPhone(user.phone) },
                   { label: 'Member since', value: formatDate(user.createdAt) },
                   { label: 'Email verified', value: user.isEmailVerified ? 'Yes' : 'No' },
-                  { label: 'Mobile verified', value: user.isPhoneVerified ? 'Yes' : 'No' },
+                  ...(SMS_ENABLED ? [{ label: 'Mobile verified', value: user.isPhoneVerified ? 'Yes' : 'No' }] : []),
                 ]}
               />
             </CardBody>

@@ -18,6 +18,13 @@ function channelFor(purpose) {
  * Returns where the code was sent (masked).
  */
 async function issueOtp(user, purpose) {
+  // No SMS gateway is integrated yet, so codes are only sent by email.
+  if (channelFor(purpose) === 'sms') {
+    throw ApiError.badRequest('Verification by SMS is not available yet. Please use your email address.', {
+      code: 'SMS_UNAVAILABLE',
+    });
+  }
+
   const latest = await OTP.findOne({ userId: user._id, purpose, verifiedAt: null }).sort({ createdAt: -1 });
   if (latest) {
     const elapsed = (Date.now() - latest.createdAt.getTime()) / 1000;

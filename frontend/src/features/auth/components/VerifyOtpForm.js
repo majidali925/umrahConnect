@@ -12,7 +12,7 @@ import SubmitButton from '@/components/forms/SubmitButton';
 import FormAlert from '@/components/forms/FormAlert';
 import { authService } from '@/services/auth.service';
 import { sessionStarted } from '@/features/auth/authSlice';
-import { OTP_PURPOSES } from '@/constants';
+import { OTP_PURPOSES, SMS_ENABLED } from '@/constants';
 import { getErrorMessage, getErrorCode } from '@/utils/errors';
 import { homeRouteFor } from '@/utils/routes';
 import { identifier as identifierRule, otp as otpRule } from '@/utils/validation';
@@ -134,19 +134,21 @@ export default function VerifyOtpForm() {
               >
                 {secondsLeft > 0 ? `Resend code in ${secondsLeft}s` : resending ? 'Sending…' : 'Resend code'}
               </Button>
-              <Button
-                color="link"
-                className="p-0 small"
-                disabled={secondsLeft > 0 || resending}
-                onClick={() =>
-                  resend(
-                    values.identifier.trim(),
-                    viaSms ? OTP_PURPOSES.EMAIL_VERIFICATION : OTP_PURPOSES.PHONE_VERIFICATION,
-                  )
-                }
-              >
-                {viaSms ? 'Use email instead' : 'Verify by SMS instead'}
-              </Button>
+              {SMS_ENABLED && (
+                <Button
+                  color="link"
+                  className="p-0 small"
+                  disabled={secondsLeft > 0 || resending}
+                  onClick={() =>
+                    resend(
+                      values.identifier.trim(),
+                      viaSms ? OTP_PURPOSES.EMAIL_VERIFICATION : OTP_PURPOSES.PHONE_VERIFICATION,
+                    )
+                  }
+                >
+                  {viaSms ? 'Use email instead' : 'Verify by SMS instead'}
+                </Button>
+              )}
             </div>
           </Form>
         )}
