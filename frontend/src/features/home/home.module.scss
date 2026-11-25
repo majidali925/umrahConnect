@@ -9,6 +9,7 @@
 
 .page {
   background: $page-bg;
+  overflow-x: clip;
 
   // Room for the fixed tab bar on phones.
   @include media-breakpoint-down(md) {
@@ -101,9 +102,12 @@
 /* ------------------------------------------------------------------ */
 
 // The whole hero (text, photo and search button) fits on the first screen: on large screens
-// it fills the viewport under the header and its type scales with the viewport height; on
-// phones spacing, photo and badge are compact enough for a ~660px tall visible area.
+// its type and spacing scale with the viewport height; on phones spacing, photo and badge are
+// compact enough for a ~660px tall visible area. It takes only the height it needs, so on tall
+// screens the trust strip and city chips follow straight after instead of empty space.
 .hero {
+  position: relative;
+  isolation: isolate; // keeps the backdrop below the content but above the page background
   display: grid;
   gap: 0.9rem;
   padding: 1rem 0 0.5rem;
@@ -118,16 +122,32 @@
   }
 
   @include media-breakpoint-up(lg) {
-    min-height: calc(100svh - #{$header-height});
     grid-template-columns: 7fr 5fr;
     grid-template-rows: auto auto;
     grid-template-areas:
       'text visual'
       'search visual';
-    align-content: center;
     column-gap: 3.5rem;
     row-gap: clamp(1rem, 2.5vh, 1.5rem);
-    padding: clamp(1.25rem, 4vh, 2.5rem) 0;
+    padding: clamp(1.5rem, 5vh, 3.5rem) 0 clamp(1rem, 3vh, 2rem);
+  }
+
+  // Soft full-width backdrop: a mint glow behind the text, a warm copper glow behind the
+  // photo, fading into the page colour.
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    background:
+      radial-gradient(ellipse 55% 60% at 12% 35%, rgba($brand-mint, 0.45), transparent 70%),
+      radial-gradient(ellipse 45% 55% at 88% 30%, rgba($brand-copper-light, 0.9), transparent 70%),
+      linear-gradient(to bottom, #fff 0%, $page-bg 100%);
+    pointer-events: none;
   }
 }
 
@@ -138,6 +158,25 @@
 
 .heroVisual {
   grid-area: visual;
+  position: relative;
+
+  // Dotted accent peeking out from behind the photo's top-right corner.
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: -1.25rem;
+    right: -1.25rem;
+    width: 9rem;
+    height: 9rem;
+    background-image: radial-gradient(rgba($brand-copper, 0.35) 1.5px, transparent 1.6px);
+    background-size: 14px 14px;
+    pointer-events: none;
+
+    @include media-breakpoint-down(lg) {
+      display: none;
+    }
+  }
 
   // As tall as the text and search together.
   @include media-breakpoint-up(lg) {
@@ -295,6 +334,7 @@
 /* Hero picture */
 .visual {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   width: 100%;
   aspect-ratio: 5 / 2;
