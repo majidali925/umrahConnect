@@ -48,7 +48,12 @@ export default function RegisterForm({ role }) {
         role,
         ...(isVendor ? { vendorType: VENDOR_TYPES.REGISTERED_AGENCY } : {}),
       });
-      const params = new URLSearchParams({ identifier: values.email.trim(), sentTo: data.verification.destination });
+      // If the code email could not be sent, the verify page sends a fresh one on arrival.
+      const params = new URLSearchParams(
+        data.verification.sent === false
+          ? { identifier: values.email.trim(), resend: '1' }
+          : { identifier: values.email.trim(), sentTo: data.verification.destination },
+      );
       router.push(`/verify-otp?${params}`);
     } catch (err) {
       if (!applyServerErrors(err, setErrors)) setError(getErrorMessage(err));

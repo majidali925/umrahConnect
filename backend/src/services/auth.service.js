@@ -1,6 +1,6 @@
 const { User, Agency } = require('../models');
 const ApiError = require('../utils/ApiError');
-const { normalizePakistaniMobile } = require('../utils/phone');
+const { normalizePakistaniMobile, maskEmail } = require('../utils/phone');
 const { ROLES, OTP_PURPOSES, AUDIT_ACTIONS, ENTITY_TYPES, AGENCY_STATUS } = require('../constants');
 const tokenService = require('./token.service');
 const { createSessionStore } = require('./sessionStore');
@@ -86,7 +86,14 @@ async function register({ fullName, email, phone, password, role, vendorType }) 
     metadata: { role, vendorType: vendorType || undefined },
   });
 
-  const delivery = await otpService.issueOtp(user, OTP_PURPOSES.EMAIL_VERIFICATION);
+  let delivery;
+  try {
+    delivery = { ...(await otpService.issueOtp(user, OTP_PURPOSES.EMAIL_VERIFICATION)), sent: true };
+  } catch (err) {
+    if (err.code !== 'EMAIL_NOT_SENT') throw err;
+    // The account exists now, so registering again would fail: let the user resend the code instead.
+    delivery = { channel: 'email', destination: maskEmail(user.email), sent: false };
+  }
   return { user: user.toPublic(), verification: { purpose: OTP_PURPOSES.EMAIL_VERIFICATION, ...delivery } };
 }
 

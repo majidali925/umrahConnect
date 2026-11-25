@@ -32,7 +32,7 @@ async function issueOtp(user, purpose) {
   await OTP.deleteMany({ userId: user._id, purpose, verifiedAt: null });
 
   const code = generateOtp();
-  await OTP.create({
+  const otp = await OTP.create({
     userId: user._id,
     purpose,
     otpHash: await bcrypt.hash(code, OTP_HASH_ROUNDS),
@@ -49,12 +49,23 @@ async function issueOtp(user, purpose) {
     return { channel, destination: maskPhone(user.phone) };
   }
 
-  await notification.sendEmail(user.email, 'otp', {
-    name: user.fullName,
-    code,
-    purpose,
-    minutes: env.otp.expiresInMinutes,
-  });
+  try {
+    await notification.sendEmail(
+      user.email,
+      'otp',
+      { name: user.fullName, code, purpose, minutes: env.otp.expiresInMinutes },
+      { required: true },
+    );
+  } catch (err) {
+    // The code never reached the user: drop it so the resend cooldown does not block a retry.
+    await OTP.deleteOne({ _id: otp._id });
+    if (err.code === 'EMAIL_NOT_SENT') {
+      throw new ApiError(502, "We couldn't send your verification code. Please try again in a moment.", {
+        code: 'EMAIL_NOT_SENT',
+      });
+    }
+    throw err;
+  }
   return { channel, destination: maskEmail(user.email) };
 }
 

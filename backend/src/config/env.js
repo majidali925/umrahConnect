@@ -32,6 +32,11 @@ if (!cloudinarySet.length && nodeEnv === 'production') {
   throw new Error(`File storage is not configured: set ${CLOUDINARY_KEYS.join(', ')}`);
 }
 
+// Brevo needs a sender address (a verified sender or domain in the Brevo account).
+if (process.env.BREVO_API_KEY && !process.env.MAIL_FROM_EMAIL) {
+  throw new Error('MAIL_FROM_EMAIL is required when BREVO_API_KEY is set');
+}
+
 const env = {
   nodeEnv,
   isProduction: nodeEnv === 'production',
@@ -71,6 +76,12 @@ const env = {
     user: process.env.SMTP_USER,
     password: process.env.SMTP_PASSWORD,
     from: process.env.EMAIL_FROM || 'UmrahConnect <no-reply@umrahconnect.pk>',
+  },
+  // Brevo transactional email API. When set, every email is sent through Brevo (SMTP is ignored).
+  brevo: {
+    apiKey: process.env.BREVO_API_KEY || '',
+    fromEmail: process.env.MAIL_FROM_EMAIL || '',
+    fromName: process.env.MAIL_FROM_NAME || 'UmrahConnect',
   },
   adminNotificationEmail: process.env.ADMIN_NOTIFICATION_EMAIL || '',
   // OpenStreetMap Nominatim, used to look up hotels and their distance from the Haram.
