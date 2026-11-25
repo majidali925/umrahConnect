@@ -1,0 +1,1033 @@
+@import '../../styles/variables';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/breakpoints';
+
+/* ------------------------------------------------------------------ */
+/* Page & shared bits                                                  */
+/* ------------------------------------------------------------------ */
+
+.page {
+  background: $page-bg;
+
+  // Room for the fixed tab bar on phones.
+  @include media-breakpoint-down(md) {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+.section {
+  padding: 2.5rem 0;
+
+  @include media-breakpoint-up(lg) {
+    padding: 3.5rem 0;
+  }
+}
+
+.eyebrow,
+.eyebrowMuted {
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $brand-copper;
+}
+
+.eyebrowMuted {
+  color: $muted;
+}
+
+.h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  color: $ink;
+}
+
+.sub {
+  max-width: 620px;
+  margin: 0.6rem 0 0;
+  color: $muted;
+}
+
+.viewAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: $brand-ink;
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: $brand-copper;
+  }
+}
+
+.copperBtn {
+  background: $brand-copper;
+  border-color: $brand-copper;
+  color: #fff;
+
+  &:hover,
+  &:focus-visible {
+    background: darken($brand-copper, 5%);
+    border-color: darken($brand-copper, 5%);
+    color: #fff;
+  }
+}
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: #fff;
+  color: $muted;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $brand-ink;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+// The whole hero (text, photo and search button) fits on the first screen: on large screens
+// it fills the viewport under the header and its type scales with the viewport height; on
+// phones spacing, photo and badge are compact enough for a ~660px tall visible area.
+.hero {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 0 0.5rem;
+  grid-template-areas:
+    'text'
+    'visual'
+    'search';
+
+  @include media-breakpoint-up(md) {
+    gap: 1.25rem;
+    padding: 1.5rem 0 1rem;
+  }
+
+  @include media-breakpoint-up(lg) {
+    min-height: calc(100svh - #{$header-height});
+    grid-template-columns: 7fr 5fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      'text visual'
+      'search visual';
+    align-content: center;
+    column-gap: 3.5rem;
+    row-gap: clamp(1rem, 2.5vh, 1.5rem);
+    padding: clamp(1.25rem, 4vh, 2.5rem) 0;
+  }
+}
+
+.heroText {
+  grid-area: text;
+  align-self: end;
+}
+
+.heroVisual {
+  grid-area: visual;
+
+  // As tall as the text and search together.
+  @include media-breakpoint-up(lg) {
+    align-self: stretch;
+    display: flex;
+  }
+}
+
+.heroSearch {
+  grid-area: search;
+  align-self: start;
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: $brand-green-light;
+  border: 1px solid rgba($brand-green, 0.15);
+  color: $brand-ink;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  @media (max-width: 767.98px) and (max-height: 640px) {
+    display: none;
+  }
+
+  @include media-breakpoint-up(lg) {
+    margin-bottom: clamp(0.6rem, 2vh, 1rem);
+    font-size: 0.7rem;
+  }
+}
+
+.title {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.55rem, 6.6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: $ink;
+
+  @include media-breakpoint-up(lg) {
+    margin-bottom: clamp(0.5rem, 1.8vh, 0.9rem);
+    font-size: clamp(2.2rem, 6.4vh, 3.4rem);
+  }
+}
+
+.highlight {
+  color: $brand-green;
+}
+
+.lead {
+  max-width: 540px;
+  margin-bottom: 0;
+  color: $muted;
+  font-size: 0.92rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+
+  @include media-breakpoint-up(lg) {
+    font-size: clamp(0.95rem, 2.3vh, 1.1rem);
+  }
+}
+
+/* Search card */
+.search {
+  padding: 0.85rem;
+  border-radius: $border-radius-xl;
+  background: #fff;
+  border: 1px solid $lavender-line;
+  box-shadow: 0 8px 28px rgba(30, 40, 90, 0.07);
+
+  @include media-breakpoint-up(md) {
+    padding: 1.1rem 1.25rem;
+  }
+
+  :global(.form-select) {
+    border-color: transparent;
+    background-color: $lavender;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  :global(.mt-3) {
+    margin-top: 0.75rem !important;
+  }
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 0.75rem;
+}
+
+.fieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+  color: $muted;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.searchBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  background: $brand-copper;
+  border-color: $brand-copper;
+  color: #fff;
+
+  &:hover,
+  &:focus-visible {
+    background: darken($brand-copper, 5%);
+    border-color: darken($brand-copper, 5%);
+    color: #fff;
+  }
+
+  // Phones use the deep green from the mobile design.
+  @include media-breakpoint-down(md) {
+    background: $brand-ink;
+    border-color: $brand-ink;
+
+    &:hover,
+    &:focus-visible {
+      background: darken($brand-ink, 5%);
+      border-color: darken($brand-ink, 5%);
+    }
+  }
+}
+
+.filterBtn {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  background: $lavender;
+  color: $brand-ink;
+
+  &:hover {
+    background: $lavender-line;
+    color: $brand-ink;
+  }
+}
+
+/* Hero picture */
+.visual {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  border-radius: 1.25rem;
+  background: $brand-ink;
+  box-shadow: 0 20px 45px rgba(15, 59, 43, 0.2);
+
+  // Very short phone screens: a slimmer photo keeps the search button above the fold.
+  @media (max-width: 767.98px) and (max-height: 640px) {
+    aspect-ratio: 3 / 1;
+  }
+
+  // Fills the column height set by the text and search.
+  @include media-breakpoint-up(lg) {
+    aspect-ratio: auto;
+    min-height: 380px;
+  }
+}
+
+// The Kaaba sits low in the photo: keep it in view above the badge at any crop.
+.visualImg {
+  object-fit: cover;
+  object-position: 50% 75%;
+
+  @include media-breakpoint-down(lg) {
+    object-position: 50% 72%;
+  }
+}
+
+.visualBadge {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: $border-radius-lg;
+  background: rgba(#fff, 0.95);
+  color: $ink;
+  font-size: 0.9rem;
+
+  .livePill {
+    margin-left: auto;
+    background: $brand-mint;
+    color: $brand-ink;
+    font-weight: 700;
+  }
+
+  // Phones and tablets: a small pill, as in the mobile design, so the photo stays visible.
+  @include media-breakpoint-down(lg) {
+    left: 0.65rem;
+    right: auto;
+    bottom: 0.65rem;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem 0.3rem 0.35rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+
+    .visualSub,
+    .livePill {
+      display: none !important;
+    }
+
+    .visualIcon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+
+      svg {
+        width: 13px;
+        height: 13px;
+      }
+    }
+  }
+}
+
+.visualIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: $brand-ink;
+  color: #fff;
+}
+
+.visualSub {
+  display: block;
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Trust strip & city chips                                            */
+/* ------------------------------------------------------------------ */
+
+.trustStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.75rem;
+  margin-top: 1.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: $border-radius-lg;
+  background: $lavender;
+  border: 1px solid $lavender-line;
+
+  .livePill {
+    margin-left: auto;
+  }
+}
+
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: $ink;
+  font-size: 0.85rem;
+
+  svg {
+    color: $brand-green;
+  }
+}
+
+.cities {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+
+  @include media-breakpoint-down(md) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.citiesHeading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $ink;
+
+  @include media-breakpoint-down(md) {
+    justify-content: space-between;
+  }
+}
+
+.cityCount {
+  color: $muted;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
+
+  // Phones: one row that scrolls sideways.
+  @include media-breakpoint-down(md) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 calc(-1 * var(--bs-gutter-x, 0.75rem));
+    padding: 0 var(--bs-gutter-x, 0.75rem) 0.25rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: $lavender;
+  color: $ink;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &:hover {
+    background: $lavender-line;
+    color: $ink;
+  }
+}
+
+.chipActive,
+.chipActive:hover {
+  background: $brand-ink;
+  color: #fff;
+
+  .chipCount {
+    background: rgba(#fff, 0.18);
+    color: #fff;
+  }
+}
+
+.chipCount {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #fff;
+  color: $muted;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* Compare banner                                                      */
+/* ------------------------------------------------------------------ */
+
+.compareBanner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: $border-radius-xl;
+  background: $lavender;
+  border: 1px solid $lavender-line;
+
+  @include media-breakpoint-down(md) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+    margin-bottom: 2rem;
+    padding: 1.1rem;
+  }
+}
+
+.compareIcon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: $brand-copper-light;
+  color: $brand-copper;
+}
+
+.compareTitle {
+  margin-bottom: 0.2rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.slots {
+  display: flex;
+
+  > span {
+    width: 30px;
+    height: 30px;
+    margin-left: -7px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    border: 2px solid $lavender;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  > span:first-child {
+    margin-left: 0;
+  }
+}
+
+.slot {
+  background: #fff;
+  color: $muted;
+}
+
+.slotFilled {
+  background: $brand-ink;
+  color: #fff;
+
+  & + & {
+    background: $brand-copper;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* How it works                                                        */
+/* ------------------------------------------------------------------ */
+
+.band {
+  padding: 3rem 0;
+  background: $lavender;
+
+  @include media-breakpoint-up(lg) {
+    padding: 4.5rem 0;
+  }
+}
+
+.step {
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: $border-radius-xl;
+  background: #fff;
+  border: 1px solid $lavender-line;
+
+  // Phones: number beside the text, like a list.
+  @include media-breakpoint-down(md) {
+    display: flex;
+    gap: 1rem;
+    padding: 1.1rem;
+  }
+}
+
+.stepNumber {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: $brand-ink;
+
+  @include media-breakpoint-down(md) {
+    margin-bottom: 0;
+    border-radius: 50%;
+  }
+}
+
+.stepNumber1,
+.stepNumber3 {
+  background: $brand-mint;
+}
+
+.stepNumber2 {
+  background: $brand-copper-light;
+  color: $brand-copper;
+}
+
+.stepTitle {
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.stepText {
+  margin-bottom: 0.9rem;
+  color: $muted;
+  font-size: 0.9rem;
+
+  @include media-breakpoint-down(md) {
+    margin-bottom: 0;
+  }
+}
+
+.stepNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: $ink;
+  font-size: 0.78rem;
+  font-weight: 500;
+
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+}
+
+.stepNoteCopper {
+  color: $brand-copper;
+}
+
+/* ------------------------------------------------------------------ */
+/* For agencies                                                        */
+/* ------------------------------------------------------------------ */
+
+.agencyCard {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+  margin-top: 3.5rem;
+  padding: 2.5rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  border: 1px solid $lavender-line;
+  box-shadow: 0 8px 28px rgba(30, 40, 90, 0.06);
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: 7fr 5fr;
+    padding: 3rem;
+  }
+
+  // Phones: no outer card; the pitch becomes its own deep green card.
+  @include media-breakpoint-down(md) {
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+.agencyPitch {
+  @include media-breakpoint-down(md) {
+    padding: 1.5rem 1.25rem;
+    border-radius: 1.25rem;
+    color: #fff;
+    background:
+      radial-gradient(circle at 100% 100%, rgba($brand-copper, 0.55), transparent 55%),
+      linear-gradient(150deg, $brand-green 0%, $brand-ink 100%);
+    box-shadow: 0 14px 30px rgba(15, 59, 43, 0.25);
+
+    .eyebrow {
+      color: #f6a54c;
+    }
+
+    .h2 {
+      color: #fff;
+    }
+  }
+}
+
+.agencyText {
+  margin: 0.75rem 0 1.25rem;
+  color: $muted;
+
+  @include media-breakpoint-down(md) {
+    color: rgba(#fff, 0.8);
+    font-size: 0.9rem;
+  }
+}
+
+.agencyPoints {
+  display: grid;
+  gap: 0.6rem 1.5rem;
+  margin: 0 0 1.75rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+
+  @include media-breakpoint-up(sm) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  svg {
+    margin-top: 0.15rem;
+    color: $brand-green;
+
+    @include media-breakpoint-down(md) {
+      color: $brand-mint;
+    }
+  }
+}
+
+.agencyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: $brand-ink;
+  border-color: $brand-ink;
+  color: #fff;
+
+  &:hover,
+  &:focus-visible {
+    background: darken($brand-ink, 5%);
+    color: #fff;
+  }
+
+  @include media-breakpoint-down(md) {
+    flex-grow: 1;
+    justify-content: center;
+    min-height: 48px;
+    background: #f28c28;
+    border-color: #f28c28;
+
+    &:hover,
+    &:focus-visible {
+      background: darken(#f28c28, 6%);
+      border-color: darken(#f28c28, 6%);
+    }
+  }
+}
+
+.ghostBtn {
+  background: $lavender;
+  color: $ink;
+
+  &:hover {
+    background: $lavender-line;
+    color: $ink;
+  }
+
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+}
+
+.vetting {
+  scroll-margin-top: 90px;
+  padding: 1.5rem;
+  border-radius: $border-radius-xl;
+  background: $lavender;
+}
+
+.vettingTitle {
+  margin-bottom: 1.1rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.vettingSteps {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    counter-increment: step;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 1rem 2.75rem;
+    font-size: 0.92rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    &::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: $brand-ink;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    &:last-child::before {
+      background: $brand-copper;
+    }
+
+    span {
+      color: $muted;
+      font-size: 0.82rem;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* FAQ                                                                 */
+/* ------------------------------------------------------------------ */
+
+.faqList {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.faq {
+  border-radius: $border-radius-lg;
+  background: #fff;
+  border: 1px solid $lavender-line;
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &[open] .faqChevron {
+    transform: rotate(180deg);
+  }
+}
+
+.faqQ {
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.faqChevron {
+  color: $muted;
+  transition: transform 0.2s ease;
+}
+
+.faqA {
+  margin: 0;
+  padding: 0 1.25rem 1.1rem;
+  color: $muted;
+  font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Verification promise                                                */
+/* ------------------------------------------------------------------ */
+
+.promise {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: $border-radius-xl;
+  background: #fff;
+  border: 1px solid $lavender-line;
+
+  @include media-breakpoint-down(md) {
+    flex-wrap: wrap;
+  }
+}
+
+.promiseIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: $brand-mint;
+  color: $brand-ink;
+}
+
+.promiseTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0.25rem 0.6rem;
+    border-radius: $border-radius-sm;
+    background: $lavender;
+    color: $brand-ink;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile tab bar                                                      */
+/* ------------------------------------------------------------------ */
+
+.tabBar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 1015;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.4rem 0.25rem calc(0.4rem + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid $lavender-line;
+  box-shadow: 0 -4px 16px rgba(30, 40, 90, 0.06);
+
+  @include media-breakpoint-up(md) {
+    display: none;
+  }
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0;
+  color: $muted;
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  &:hover {
+    color: $brand-ink;
+  }
+}
+
+.tabActive {
+  color: $brand-ink;
+  font-weight: 700;
+}
+
+.tabBadge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: $brand-copper;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+}

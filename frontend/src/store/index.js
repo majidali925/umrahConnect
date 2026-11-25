@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { sessionRefreshed, sessionCleared } from '@/features/auth/authSlice';
-import { configureApiClient } from '@/services/apiClient';
+import { configureApiClient } from '@/services/apiSession';
 
 // A plain root reducer instead of a reducer map: Redux's combineReducers probes reducers
 // with a Math.random() action type, which Next.js Cache Components rejects during prerender.

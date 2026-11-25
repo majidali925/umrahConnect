@@ -5,21 +5,12 @@ import Link from 'next/link';
 import { Card, CardBody, Input, Row, Col, Label, Button, Alert } from 'reactstrap';
 import Pagination from '@/components/common/Pagination';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
-import { browseQuery } from '@/features/packages/browseQuery';
+import { browseQuery, SORT_OPTIONS, PRICE_OPTIONS } from '@/features/packages/browseQuery';
 import PackageCard from '@/features/packages/components/PackageCard';
 import CompareTray from '@/features/packages/components/CompareTray';
 import { packageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { useUrlParams, useUrlSearch } from '@/hooks/useUrlParams';
-
-const SORT_OPTIONS = [
-  { value: 'departure', label: 'Departure: soonest first' },
-  { value: 'price_asc', label: 'Price: low to high' },
-  { value: 'price_desc', label: 'Price: high to low' },
-  { value: 'newest', label: 'Newest first' },
-];
-
-const PRICE_OPTIONS = [200000, 300000, 400000, 500000, 750000, 1000000];
 
 // Wait this long after the last keystroke before searching.
 const SEARCH_DELAY = 500;
