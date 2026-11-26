@@ -149,8 +149,21 @@ describe('Packages and seat requests', () => {
       assert.equal(pkg.agency.phone, undefined);
       assert.equal(pkg.createdBy, undefined);
 
+      assert.equal(pkg.description, undefined, 'listing omits the long description');
+
       const search = await h.api().get('/api/v1/packages').query({ search: 'zamzam' });
       assert.equal(search.body.data.length, 1);
+      // Every word must match somewhere, in any order, including the agency's name.
+      const words = await h.api().get('/api/v1/packages').query({ search: 'safwa  LAHORE' });
+      assert.equal(words.body.data.length, 1);
+      const byAgency = await h.api().get('/api/v1/packages').query({ search: 'al-noor premium' });
+      assert.equal(byAgency.body.data.length, 1);
+      const partial = await h.api().get('/api/v1/packages').query({ search: 'lahore karachi' });
+      assert.equal(partial.body.data.length, 0);
+
+      const counts = await h.api().get('/api/v1/packages/departure-cities/counts');
+      assert.equal(counts.status, 200);
+      assert.deepEqual(counts.body.data, { total: 1, cities: [{ city: 'Lahore', count: 1 }] });
       const none = await h.api().get('/api/v1/packages').query({ maxPrice: 1000 });
       assert.equal(none.body.data.length, 0);
     });

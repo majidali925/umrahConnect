@@ -225,12 +225,15 @@ async function removeCoverImage(user, agency, packageId) {
 
 const approvedAgencyIds = () => Agency.find({ verificationStatus: AGENCY_STATUS.APPROVED }).distinct('_id');
 
-/** Filter for packages anyone may see: published, upcoming, from a currently approved agency. */
-async function publicFilter() {
+/**
+ * Filter for packages anyone may see: published, upcoming, from a currently approved agency.
+ * Pass `agencyIds` when the caller has already loaded the approved agencies.
+ */
+async function publicFilter(agencyIds) {
   return {
     status: PACKAGE_STATUS.PUBLISHED,
     departureDate: { $gt: new Date() },
-    agencyId: { $in: await approvedAgencyIds() },
+    agencyId: { $in: agencyIds ?? (await approvedAgencyIds()) },
   };
 }
 
@@ -265,15 +268,44 @@ const SORTS = {
   newest: { publishedAt: -1 },
 };
 
+// Package fields matched by the catalogue search box (besides the agency's name).
+const SEARCH_FIELDS = ['title', 'departureCity', 'makkahHotel.name', 'madinahHotel.name'];
+const MAX_SEARCH_TERMS = 6;
+// Listing cards never show the long description; the package page loads it.
+const LIST_FIELDS = '-description -createdBy';
+
+/** The distinct words of a search, lower-cased: "Lahore  5 star" → ['lahore', '5', 'star']. */
+function searchTerms(search = '') {
+  return [...new Set(search.toLowerCase().split(/\s+/).filter(Boolean))].slice(0, MAX_SEARCH_TERMS);
+}
+
+/**
+ * Every word must appear somewhere (in any order): in the title, departure city, a hotel name
+ * or the agency's name. So "lahore safwa" finds Lahore departures staying at Al Safwa.
+ */
+function searchFilter(terms, agencies) {
+  return terms.map((term) => {
+    const regex = new RegExp(escapeRegex(term), 'i');
+    const byAgency = agencies.filter((a) => regex.test(a.businessName)).map((a) => a._id);
+    const or = SEARCH_FIELDS.map((field) => ({ [field]: regex }));
+    if (byAgency.length) or.push({ agencyId: { $in: byAgency } });
+    return { $or: or };
+  });
+}
+
 async function browsePackages(query) {
   const pagination = getPagination(query);
-  const filter = await publicFilter();
-  if (query.search) {
-    const regex = new RegExp(escapeRegex(query.search), 'i');
-    filter.$or = [{ title: regex }, { departureCity: regex }, { 'makkahHotel.name': regex }, { 'madinahHotel.name': regex }];
-  }
-  // One agency's packages; still limited to approved agencies by publicFilter.
-  if (query.agencyId) filter.agencyId.$in = filter.agencyId.$in.filter((id) => id.equals(query.agencyId));
+  const terms = searchTerms(query.search);
+  // One read gives both the approved agency ids and, when searching, their names.
+  const agencies = await Agency.find(
+    { verificationStatus: AGENCY_STATUS.APPROVED },
+    terms.length ? 'businessName' : '_id',
+  ).lean();
+  // One agency's packages; still limited to approved agencies.
+  const agencyIds = agencies.map((a) => a._id).filter((id) => !query.agencyId || id.equals(query.agencyId));
+
+  const filter = await publicFilter(agencyIds);
+  if (terms.length) filter.$and = searchFilter(terms, agencies);
   if (query.departureCity) filter.departureCity = new RegExp(`^${escapeRegex(query.departureCity)}$`, 'i');
   if (query.from) filter.departureDate.$gte = query.from;
   if (query.to) filter.departureDate.$lte = query.to;
@@ -281,6 +313,7 @@ async function browsePackages(query) {
 
   const [packages, total] = await Promise.all([
     Package.find(filter)
+      .select(LIST_FIELDS)
       .sort(SORTS[query.sort] || SORTS.departure)
       .skip(pagination.skip)
       .limit(pagination.limit)
@@ -299,10 +332,24 @@ async function getPublicPackage(packageId) {
   return publicPackage(pkg);
 }
 
+/**
+ * How many listed packages leave from each city, busiest first: [{ city, count }]. Cities are
+ * grouped ignoring case (the city filter matches that way too), so "Lahore" and "lahore" are one.
+ */
+async function departureCityCounts() {
+  const rows = await Package.aggregate([
+    { $match: await publicFilter() },
+    { $group: { _id: { $toLower: '$departureCity' }, city: { $first: '$departureCity' }, count: { $sum: 1 } } },
+  ]);
+  return rows
+    .map(({ city, count }) => ({ city, count }))
+    .sort((a, b) => b.count - a.count || a.city.localeCompare(b.city));
+}
+
 /** Departure cities of currently listed packages, for the browse filter. */
 async function listDepartureCities() {
-  const cities = await Package.distinct('departureCity', await publicFilter());
-  return cities.sort((a, b) => a.localeCompare(b));
+  const counts = await departureCityCounts();
+  return counts.map((c) => c.city).sort((a, b) => a.localeCompare(b));
 }
 
 /* ------------------------------------------------------------------ */
@@ -611,6 +658,7 @@ module.exports = {
   browsePackages,
   getPublicPackage,
   listDepartureCities,
+  departureCityCounts,
   requestQuotation,
   listMyQuotations,
   cancelMyQuotation,

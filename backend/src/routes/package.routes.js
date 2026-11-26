@@ -13,6 +13,7 @@ const byPackage = validate(schemas.packageIdParam, 'params');
 // Public catalogue: only published, upcoming packages from approved agencies.
 router.get('/', validate(schemas.browsePackages, 'query'), controller.browse);
 router.get('/departure-cities', controller.departureCities);
+router.get('/departure-cities/counts', controller.departureCityCounts);
 router.get('/:packageId', byPackage, controller.getPublic);
 
 // Customers request seats; the agency confirms. No payment is taken.
