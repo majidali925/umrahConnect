@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from 'reactstrap';
 import { useCompare, MAX_COMPARE } from '../compareStore';
 
 /**
@@ -24,16 +23,15 @@ export default function CompareToggle({ pkg, size = 'sm', className = '' }) {
 
   return (
     <div className={`position-relative ${className}`} style={{ zIndex: 2 }}>
-      <Button
-        size={size}
-        color={selected ? 'primary' : 'light'}
-        className={selected ? '' : 'border'}
+      <button
+        type="button"
+        className={`btn btn-${size} ${selected ? 'btn-primary' : 'btn-light border'}`}
         onClick={toggle}
         aria-pressed={selected}
         title={!selected && isFull ? `You can compare up to ${MAX_COMPARE} packages` : undefined}
       >
         {selected ? '✓ Comparing' : '+ Compare'}
-      </Button>
+      </button>
       {fullNotice && !selected && (
         <div className="small text-danger text-end mt-1" role="alert">
           You can compare up to {MAX_COMPARE} packages. Remove one first.

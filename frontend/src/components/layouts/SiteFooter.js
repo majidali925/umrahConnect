@@ -1,50 +1,69 @@
-import Link from 'next/link';
+import Link from '@/components/common/IntentLink';
 import BrandLogo from '@/components/common/BrandLogo';
 import CurrentYear from '@/components/common/CurrentYear';
+import Icon from '@/components/common/Icon';
+import styles from './SiteFooter.module.scss';
+
+const COLUMNS = [
+  {
+    title: 'Pilgrims',
+    links: [
+      { href: '/packages', label: 'Browse Umrah packages' },
+      { href: '/packages/compare', label: 'Compare packages' },
+      { href: '/#faq', label: 'Umrah booking FAQ' },
+      { href: '/register', label: 'Create an account' },
+    ],
+  },
+  {
+    title: 'Verification',
+    links: [
+      { href: '/#verification', label: 'How agencies are verified' },
+      { href: '/#how-it-works', label: 'How booking works' },
+    ],
+  },
+  {
+    title: 'Agencies',
+    links: [
+      { href: '/register/vendor', label: 'Register your agency' },
+      { href: '/login', label: 'Agency sign in' },
+    ],
+  },
+];
 
 export default function SiteFooter() {
   return (
-    <footer className="border-top bg-surface py-5 mt-auto">
+    <footer className={`${styles.footer} mt-auto`}>
       <div className="container">
         <div className="row g-4">
-          <div className="col-md-5">
+          <div className="col-lg-5">
             <BrandLogo size="sm" />
-            <p className="text-secondary small mt-3 mb-0" style={{ maxWidth: 360 }}>
+            <p className={`${styles.about} mt-3`}>
               Compare Umrah packages from verified Umrah travel agencies across Pakistan — prices, hotels near the Haram
               and what is included, in one place.
             </p>
+            <p className={styles.guarantee}>
+              <Icon name="shield" size={15} /> Every listed agency is verified by our team
+            </p>
           </div>
-          <div className="col-6 col-md-3">
-            <h6 className="fw-bold">Pilgrims</h6>
-            <ul className="list-unstyled small mb-0">
-              <li className="mb-1">
-                <Link href="/packages">Browse Umrah packages</Link>
-              </li>
-              <li className="mb-1">
-                <Link href="/#faq">Umrah booking FAQ</Link>
-              </li>
-              <li className="mb-1">
-                <Link href="/register">Create an account</Link>
-              </li>
-              <li>
-                <Link href="/login">Log in</Link>
-              </li>
-            </ul>
-          </div>
-          <div className="col-6 col-md-4">
-            <h6 className="fw-bold">For Umrah agencies</h6>
-            <ul className="list-unstyled small mb-0">
-              <li className="mb-1">
-                <Link href="/register/vendor">Register your agency</Link>
-              </li>
-              <li>
-                <Link href="/#for-agencies">Verification process</Link>
-              </li>
-            </ul>
-          </div>
+          {COLUMNS.map((col) => (
+            <div key={col.title} className="col-6 col-md-4 col-lg-2">
+              <h2 className={styles.heading}>{col.title}</h2>
+              <ul className="list-unstyled mb-0">
+                {col.links.map((l) => (
+                  <li key={l.href} className="mb-2">
+                    <Link href={l.href} className={styles.link}>
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <hr className="my-4" />
-        <p className="small text-secondary mb-0">© <CurrentYear /> UmrahConnect. All rights reserved.</p>
+        <hr className={styles.rule} />
+        <p className={styles.copy}>
+          © <CurrentYear /> UmrahConnect. All rights reserved.
+        </p>
       </div>
     </footer>
   );

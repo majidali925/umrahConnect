@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/common/IntentLink';
 import styles from './BrandLogo.module.scss';
 
 export default function BrandLogo({ href = '/', light = false, size = 'md' }) {

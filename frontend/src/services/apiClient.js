@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URL } from '@/constants';
+import { apiHooks } from './apiSession';
 
 /**
  * Shared Axios instance. The access token lives only in memory (Redux); the refresh
@@ -11,16 +12,7 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
-let hooks = {
-  getAccessToken: () => null,
-  onSessionRefreshed: () => {},
-  onSessionExpired: () => {},
-};
-
-/** Called once by the store provider to connect the client to auth state. */
-export function configureApiClient(config) {
-  hooks = { ...hooks, ...config };
-}
+export { configureApiClient } from './apiSession';
 
 let refreshPromise = null;
 
@@ -41,7 +33,7 @@ export function refreshSession() {
 }
 
 apiClient.interceptors.request.use((config) => {
-  const token = hooks.getAccessToken();
+  const token = apiHooks().getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -56,17 +48,17 @@ apiClient.interceptors.response.use(
       original._retried = true;
       try {
         const session = await refreshSession();
-        hooks.onSessionRefreshed(session);
+        apiHooks().onSessionRefreshed(session);
         original.headers.Authorization = `Bearer ${session.accessToken}`;
         return apiClient(original);
       } catch (refreshError) {
-        hooks.onSessionExpired();
+        apiHooks().onSessionExpired();
         return Promise.reject(refreshError);
       }
     }
 
     if (error.response?.status === 401 && ['ACCOUNT_UNAVAILABLE', 'INVALID_TOKEN'].includes(code)) {
-      hooks.onSessionExpired();
+      apiHooks().onSessionExpired();
     }
 
     return Promise.reject(error);

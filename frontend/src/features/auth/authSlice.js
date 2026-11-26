@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authService } from '@/services/auth.service';
+
+// The auth service (and the HTTP client behind it) is loaded on first use, after the page is
+// interactive, so pages that only need to know who is signed in don't ship it up front.
+const loadAuthService = () => import('@/services/auth.service').then((m) => m.authService);
 
 /**
  * status:
@@ -13,7 +16,7 @@ const initialState = { user: null, agency: null, accessToken: null, status: 'idl
 /** Restores the session on page load by exchanging the HTTP-only refresh cookie. */
 export const initAuth = createAsyncThunk('auth/init', async () => {
   try {
-    return await authService.refresh();
+    return await (await loadAuthService()).refresh();
   } catch {
     return null;
   }
@@ -21,7 +24,7 @@ export const initAuth = createAsyncThunk('auth/init', async () => {
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   try {
-    await authService.logout();
+    await (await loadAuthService()).logout();
   } catch {
     // Clear local state even if the network request fails.
   }
