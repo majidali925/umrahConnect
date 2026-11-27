@@ -5,6 +5,7 @@ const audit = require('./audit.service');
 const notification = require('./notification.service');
 const storage = require('./storage.service');
 const reviewService = require('./review.service');
+const featuredService = require('./featured.service');
 const {
   AGENCY_STATUS,
   PACKAGE_STATUS,
@@ -58,15 +59,24 @@ async function listMyPackages(agency, query) {
     Package.find(filter).sort({ departureDate: 1, createdAt: -1 }).skip(pagination.skip).limit(pagination.limit),
     Package.countDocuments(filter),
   ]);
-  const counts = await quotationCounts(packages.map((p) => p._id));
-  const items = packages.map((p) => ({ ...p.toJSON(), quotationCounts: counts[String(p._id)] || {} }));
+  const ids = packages.map((p) => p._id);
+  const [counts, features] = await Promise.all([quotationCounts(ids), featuredService.latestRequests(ids)]);
+  const items = packages.map((p) => ({
+    ...p.toJSON(),
+    quotationCounts: counts[String(p._id)] || {},
+    featureRequest: features[String(p._id)] || null,
+  }));
   return { items, meta: buildMeta(pagination, total) };
 }
 
 async function getMyPackage(agency, packageId) {
   const pkg = await findMyPackage(agency, packageId);
-  const counts = await quotationCounts([pkg._id]);
-  return { ...pkg.toJSON(), quotationCounts: counts[String(pkg._id)] || {} };
+  const [counts, features] = await Promise.all([quotationCounts([pkg._id]), featuredService.latestRequests([pkg._id])]);
+  return {
+    ...pkg.toJSON(),
+    quotationCounts: counts[String(pkg._id)] || {},
+    featureRequest: features[String(pkg._id)] || null,
+  };
 }
 
 async function createPackage(user, agency, data) {
@@ -163,6 +173,8 @@ async function deletePackage(user, agency, packageId) {
   }
 
   await Quotation.deleteMany({ packageId: pkg._id });
+  // Past feature requests are kept as a record of what was featured (and paid for).
+  await featuredService.cancelPendingForPackage(pkg._id);
   await pkg.deleteOne();
   await storage.deleteImage(pkg.coverImage?.publicId);
   await audit.record({
@@ -256,6 +268,7 @@ function publicPackage(pkg) {
   const json = pkg.toJSON();
   delete json.createdBy;
   delete json.publishedAt;
+  delete json.featuredUntil; // customers only see the isFeatured label
   json.agency = publicAgency(pkg.agencyId);
   delete json.agencyId;
   return json;
@@ -272,7 +285,7 @@ const SORTS = {
 const SEARCH_FIELDS = ['title', 'departureCity', 'makkahHotel.name', 'madinahHotel.name'];
 const MAX_SEARCH_TERMS = 6;
 // Listing cards never show the long description; the package page loads it.
-const LIST_FIELDS = '-description -createdBy';
+const LIST_EXCLUDED_FIELDS = { description: 0, createdBy: 0 };
 
 /** The distinct words of a search, lower-cased: "Lahore  5 star" → ['lahore', '5', 'star']. */
 function searchTerms(search = '') {
@@ -311,15 +324,21 @@ async function browsePackages(query) {
   if (query.to) filter.departureDate.$lte = query.to;
   if (query.maxPrice) filter.pricePerPerson = { $lte: query.maxPrice };
 
-  const [packages, total] = await Promise.all([
-    Package.find(filter)
-      .select(LIST_FIELDS)
-      .sort(SORTS[query.sort] || SORTS.departure)
-      .skip(pagination.skip)
-      .limit(pagination.limit)
-      .populate('agencyId', PUBLIC_AGENCY_FIELDS),
+  // Featured packages come first, each group in the chosen order. "Featured" depends on the
+  // current time (featuredUntil > now), so it is computed in the query rather than stored.
+  const [rows, total] = await Promise.all([
+    Package.aggregate([
+      { $match: filter },
+      { $addFields: { featuredNow: { $gt: ['$featuredUntil', new Date()] } } },
+      { $sort: { featuredNow: -1, ...(SORTS[query.sort] || SORTS.departure), _id: 1 } },
+      { $skip: pagination.skip },
+      { $limit: pagination.limit },
+      { $project: { ...LIST_EXCLUDED_FIELDS, featuredNow: 0 } },
+    ]),
     Package.countDocuments(filter),
   ]);
+  const packages = rows.map((row) => Package.hydrate(row));
+  await Package.populate(packages, { path: 'agencyId', select: PUBLIC_AGENCY_FIELDS });
   return { items: packages.map(publicPackage), meta: buildMeta(pagination, total) };
 }
 

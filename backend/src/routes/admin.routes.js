@@ -3,6 +3,8 @@ const controller = require('../controllers/admin.controller');
 const validate = require('../middlewares/validate');
 const { authenticateAdmin } = require('../middlewares/adminAuth');
 const schemas = require('../validators/admin.validator');
+const featuredController = require('../controllers/featured.controller');
+const featuredSchemas = require('../validators/featured.validator');
 
 const router = express.Router();
 
@@ -29,6 +31,12 @@ router.patch(
   validate(schemas.reviewDocument),
   controller.reviewDocument,
 );
+
+router.get('/feature-requests', validate(featuredSchemas.listFeatureRequests, 'query'), featuredController.list);
+router.get('/feature-requests/:id/payment-proof', byId, featuredController.viewPaymentProof);
+router.patch('/feature-requests/:id/approve', byId, validate(featuredSchemas.approve), featuredController.approve);
+router.patch('/feature-requests/:id/reject', byId, validate(featuredSchemas.reject), featuredController.reject);
+router.patch('/feature-requests/:id/end', byId, validate(featuredSchemas.end), featuredController.end);
 
 router.get('/users', validate(schemas.listUsers, 'query'), controller.listUsers);
 router.get('/audit-logs', validate(schemas.listAuditLogs, 'query'), controller.listAuditLogs);

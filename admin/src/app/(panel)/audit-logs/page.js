@@ -10,7 +10,7 @@ import { adminService } from '@/services/admin.service';
 import { useFetch } from '@/hooks/useFetch';
 import { AUDIT_ACTION_LABELS } from '@/constants';
 
-const ENTITY_TYPES = ['Agency', 'AgencyDocument', 'Package', 'Quotation', 'User', 'Admin'];
+const ENTITY_TYPES = ['Agency', 'AgencyDocument', 'Package', 'Quotation', 'FeatureRequest', 'User', 'Admin'];
 
 export default function AuditLogsPage() {
   const [action, setAction] = useState('');

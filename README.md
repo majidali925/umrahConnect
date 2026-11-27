@@ -245,8 +245,11 @@ Every response uses the same envelope:
 | PATCH | `/quotations/:quotationId/confirm` | Confirm a pending request and reserve its seats (atomic; never exceeds the quota) |
 | PATCH | `/quotations/:quotationId/decline` | Decline a pending request with a required `reason` |
 | PATCH | `/quotations/:quotationId/cancel` | Cancel a confirmed booking and release its seats |
+| GET | `/packages/:packageId/feature` | The pre-filled featuring application (agency contact and package details), the fixed offer (`days`: 7, `price`: PKR 300) and `daysUntilDeparture` |
+| POST | `/packages/:packageId/feature` | Send the application for a published package departing in more than a day, with an optional `note` and an optional proof of payment (`multipart/form-data` field `paymentProof`: PDF/JPG/PNG, max 5 MB, stored privately). One pending application per package; refused while it is already featured |
+| DELETE | `/packages/:packageId/feature` | Withdraw the package's pending application |
 
-Package and quotation routes require an `APPROVED` agency.
+Package, quotation and featuring routes require an `APPROVED` agency. `GET /packages` includes each package's `isFeatured`, `featuredUntil` and latest `featureRequest` (`state`, `days`, `price`, `hasPaymentProof`, `decisionNote`, `startsAt`, `endsAt`).
 
 ### Packages (public): `/api/v1/packages`
 
@@ -254,7 +257,7 @@ Only published packages with a future departure from currently approved agencies
 
 | Method | Path | Description |
 | --- | --- | --- |
-| GET | `/` | Browse; filters `search`, `departureCity`, `from`, `to`, `maxPrice`; `sort` = `departure` / `price_asc` / `price_desc` / `newest` |
+| GET | `/` | Browse; filters `search`, `departureCity`, `from`, `to`, `maxPrice`; `sort` = `departure` / `price_asc` / `price_desc` / `newest`. Featured packages (`isFeatured: true`) always come first, each group in the chosen order |
 | GET | `/departure-cities` | Cities of currently listed packages |
 | GET | `/:packageId` | Package details with public agency info (no contact details) |
 | POST | `/:packageId/quotations` | Role `CUSTOMER`: request `seats` (≤ available) with an optional `message`. One pending request per package |
@@ -301,6 +304,11 @@ Every route requires an **admin** access token from `/admin/auth`. Marketplace u
 | PATCH | `/agencies/:id/reinstate` | `SUSPENDED` → `APPROVED` |
 | PATCH | `/agencies/:id/documents/:documentId/review` | Approve/reject one document (`reason` required to reject) |
 | GET | `/agencies/:id/documents/:documentId/file` | Stream a document (audit-logged) |
+| GET | `/feature-requests` | Paginated featuring applications with their submitted `application`; filters `state` (`PENDING`, `ACTIVE`, `ENDED`, `REJECTED`, `CANCELLED`), `search` (package title or agency name); `meta.stateCounts`. Pending ones with a payment proof come first |
+| GET | `/feature-requests/:id/payment-proof` | Stream the attached proof of payment |
+| PATCH | `/feature-requests/:id/approve` | Approve a pending request (optional `note`). The package is featured from now for the requested days. Refused if the package is no longer listed publicly |
+| PATCH | `/feature-requests/:id/reject` | Reject a pending request with a required `reason` |
+| PATCH | `/feature-requests/:id/end` | End an active featuring now, with a required `reason` |
 | GET | `/users` | Paginated users; filters `role`, `isActive`, `search` |
 | GET | `/audit-logs` | Paginated logs; filters `action`, `entityType`, `entityId` |
 
@@ -315,7 +323,8 @@ Every route requires an **admin** access token from `/admin/auth`. Marketplace u
 - **Agency**: one per vendor user (`userId` unique). `vendorType` (`REGISTERED_AGENCY` | `INDEPENDENT_OPERATOR`; this is a property of the agency, not a login role), business/contact/address fields (required once the application leaves `DRAFT`), `verificationStatus` (`DRAFT`, `PENDING`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `SUSPENDED`), `rejectionReason`, `suspensionReason`, `submittedAt`, `reviewStartedAt`, `approvedAt`, `approvedBy` (Admin), `suspendedAt`. Indexed on status, vendor type, business name and city.
 - **AgencyDocument**: `agencyId`, `documentType`, `category` (`IDENTITY` | `BUSINESS_REGISTRATION` | `AUTHORIZATION`), private `documentUrl` (relative storage path, never returned to clients), `originalFileName`, `mimeType`, `size`, `verificationStatus`, `reviewedBy` (Admin), `reviewedAt`, `rejectionReason`.
 - **OTP**: `userId`, bcrypt `otpHash`, `purpose`, `expiresAt` (TTL index removes expired codes), `verifiedAt`, `attempts`.
-- **Package**: `agencyId`, `title`, `description`, `departureCity`, `departureDate`, `returnDate`, `makkahHotel` / `madinahHotel` (`name`, `stars`, `distanceMeters`, `nights`), `roomType`, `pricePerPerson` (PKR), `inclusions`, `totalSeats` (quota), `bookedSeats` (changed only by confirming or cancelling bookings), `status` (`DRAFT` | `PUBLISHED`). Virtuals: `availableSeats`, `durationDays`, `isExpired`.
+- **Package**: `agencyId`, `title`, `description`, `departureCity`, `departureDate`, `returnDate`, `makkahHotel` / `madinahHotel` (`name`, `stars`, `distanceMeters`, `nights`), `roomType`, `pricePerPerson` (PKR), `inclusions`, `totalSeats` (quota), `bookedSeats` (changed only by confirming or cancelling bookings), `status` (`DRAFT` | `PUBLISHED`), `featuredUntil` (set when a feature request is approved). Virtuals: `availableSeats`, `durationDays`, `isExpired`, `isFeatured` (`featuredUntil` is in the future).
+- **FeatureRequest**: an agency's application to feature a package. `packageId`, `agencyId`, `requestedBy`, `packageTitle` and `application` (snapshot of the agency contact and package details), `days` and `price` (the fixed offer `FEATURE_DAYS` / `FEATURE_PRICE` in `backend/src/constants`: 7 days, PKR 300), `note`, optional private `paymentProof` (file reference, never returned to clients) and `hasPaymentProof`, `status` (`PENDING` → `APPROVED` / `REJECTED` / `CANCELLED`), `decisionNote`, `reviewedBy` (Admin), `reviewedAt`, `startsAt`, `endsAt`, `endedEarlyAt`. Virtual `state` splits approved requests into `ACTIVE` and `ENDED`. Payment is arranged outside the app before an admin approves.
 - **Quotation**: a customer's seat request. `packageId`, `agencyId`, `customerId`, `seats`, `message`, price snapshot (`pricePerPerson`, `estimatedTotal`), `status` (`PENDING` → `CONFIRMED` / `DECLINED` / `CANCELLED`), `agencyNote`, `cancelledBy`, `respondedAt`. Only the agency can confirm. There is no payment integration.
 - **AuditLog**: `performedBy` + `performedByModel` (`User` | `Admin`), `action`, `entityType`, `entityId`, `metadata`, timestamps. Records registrations, verifications, password resets, token-reuse revocations, submissions, admin sign-ins, every admin decision, and document uploads, reviews and views.
 

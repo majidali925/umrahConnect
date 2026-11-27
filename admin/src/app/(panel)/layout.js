@@ -8,6 +8,7 @@ import { FullPageLoader } from '@/components/common/States';
 const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/agencies', label: 'Agencies & operators' },
+  { href: '/featured', label: 'Featured requests' },
   { href: '/users', label: 'Users' },
   { href: '/audit-logs', label: 'Audit logs' },
 ];

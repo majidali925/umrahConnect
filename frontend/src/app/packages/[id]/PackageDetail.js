@@ -7,7 +7,7 @@ import { Card, CardBody, Row, Col } from 'reactstrap';
 import DetailList from '@/components/common/DetailList';
 import CloudImage from '@/components/common/CloudImage';
 import { LoadingState, ErrorState } from '@/components/common/States';
-import { SeatAvailability, Stars } from '@/features/packages/components/PackageCard';
+import { FeaturedBadge, SeatAvailability, Stars } from '@/features/packages/components/PackageCard';
 import SeatRequestForm from '@/features/packages/components/SeatRequestForm';
 import CompareToggle from '@/features/packages/components/CompareToggle';
 import { useCompare, compareHref } from '@/features/packages/compareStore';
@@ -106,6 +106,7 @@ export default function PackageDetail({ initialPackage }) {
               >
                 Verified vendor
               </span>
+              {pkg.isFeatured && <FeaturedBadge className="ms-2" />}
             </p>
           </div>
         </header>

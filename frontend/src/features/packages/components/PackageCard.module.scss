@@ -172,10 +172,8 @@
 }
 
 .city,
-.duration {
-  position: absolute;
-  top: 0.75rem;
-  z-index: 1;
+.duration,
+.featured {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -185,14 +183,43 @@
   font-weight: 700;
 }
 
-.city {
+// Top-left labels: "Featured" (when it applies) above the departure city.
+.coverTags {
+  position: absolute;
+  top: 0.75rem;
   left: 0.75rem;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.featured {
+  background: $brand-gold;
+  color: $brand-ink;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.cardFeatured {
+  border-color: $brand-gold;
+  box-shadow: 0 0 0 1px $brand-gold, 0 4px 18px rgba(30, 40, 90, 0.06);
+
+  &:hover {
+    box-shadow: 0 0 0 1px $brand-gold, 0 12px 30px rgba(30, 40, 90, 0.1);
+  }
+}
+
+.city {
   background: rgba($brand-ink, 0.85);
   color: #fff;
 }
 
 .duration {
+  position: absolute;
+  top: 0.75rem;
   right: 0.75rem;
+  z-index: 1;
   background: rgba(#ffffff, 0.94);
   color: $brand-ink;
 }

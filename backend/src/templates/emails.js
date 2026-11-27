@@ -34,6 +34,8 @@ const codeBlock = (code) =>
 const button = (href, label) =>
   `<a href="${escapeHtml(href)}" style="display:inline-block;background:${BRAND_GREEN};color:#fff;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:bold">${escapeHtml(label)}</a>`;
 
+const formatPkr = (amount) => `PKR ${Number(amount).toLocaleString('en-US')}`;
+
 const clientUrl = () => env.clientUrls[0];
 const adminUrl = () => env.adminClientUrls[0];
 
@@ -210,6 +212,66 @@ const templates = {
           (reason ? p(`<strong>Reason:</strong> ${escapeHtml(reason)}`) : '') +
           p('Please contact the agency if you have any questions.') +
           button(`${clientUrl()}/account/quotations`, 'View my requests'),
+      ),
+    };
+  },
+
+  adminFeatureRequested({ businessName, packageTitle, days, price, hasPaymentProof }) {
+    const proof = hasPaymentProof ? 'Proof of payment is attached.' : 'No proof of payment was attached.';
+    return {
+      subject: `${hasPaymentProof ? 'Paid feature request' : 'Feature request'}: ${packageTitle}`,
+      text: `${businessName} asked to feature "${packageTitle}" for ${days} day(s) (${formatPkr(price)}). ${proof}`,
+      html: layout(
+        'New feature request',
+        p(
+          `<strong>${escapeHtml(businessName)}</strong> asked to feature <strong>${escapeHtml(packageTitle)}</strong> for <strong>${escapeHtml(days)} day(s)</strong>.`,
+        ) +
+          p(`Fee: <strong>${escapeHtml(formatPkr(price))}</strong>. ${proof}`) +
+          button(`${adminUrl()}/featured`, 'Review request'),
+      ),
+    };
+  },
+
+  featureApproved({ name, businessName, packageTitle, days, endsOn }) {
+    return {
+      subject: `${packageTitle} is now featured`,
+      text: `"${packageTitle}" by ${businessName} is featured for ${days} day(s), until ${endsOn}. It is shown at the top of search results with a Featured label.`,
+      html: layout(
+        'Your package is featured',
+        p(`Assalam-o-Alaikum ${escapeHtml(name)},`) +
+          p(
+            `<strong>${escapeHtml(packageTitle)}</strong> is featured for <strong>${escapeHtml(days)} day(s)</strong>, until <strong>${escapeHtml(endsOn)}</strong>.`,
+          ) +
+          p('It is shown at the top of search results with a "Featured" label.') +
+          button(`${clientUrl()}/agency/packages`, 'View your packages'),
+      ),
+    };
+  },
+
+  featureRejected({ name, packageTitle, reason }) {
+    return {
+      subject: `Feature request for ${packageTitle} not approved`,
+      text: `Your request to feature "${packageTitle}" was not approved. Reason: ${reason}`,
+      html: layout(
+        'Feature request not approved',
+        p(`Assalam-o-Alaikum ${escapeHtml(name)},`) +
+          p(`Your request to feature <strong>${escapeHtml(packageTitle)}</strong> was not approved.`) +
+          p(`<strong>Reason:</strong> ${escapeHtml(reason)}`) +
+          button(`${clientUrl()}/agency/packages`, 'View your packages'),
+      ),
+    };
+  },
+
+  featureEnded({ name, packageTitle, reason }) {
+    return {
+      subject: `Featuring of ${packageTitle} has ended`,
+      text: `The featuring of "${packageTitle}" was ended early by UmrahConnect. Reason: ${reason}`,
+      html: layout(
+        'Featuring ended',
+        p(`Assalam-o-Alaikum ${escapeHtml(name)},`) +
+          p(`The featuring of <strong>${escapeHtml(packageTitle)}</strong> was ended early by UmrahConnect.`) +
+          p(`<strong>Reason:</strong> ${escapeHtml(reason)}`) +
+          p('Please contact UmrahConnect support if you have any questions.'),
       ),
     };
   },

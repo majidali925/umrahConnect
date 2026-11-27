@@ -44,6 +44,10 @@ const packageSchema = new mongoose.Schema(
 
     // Photo shown behind the package on cards and at the top of the package page.
     coverImage: { type: imageSchema },
+
+    // Set when an admin approves a feature request: the package is shown first in search
+    // results, with a "Featured" label, until this time. See FeatureRequest.
+    featuredUntil: { type: Date },
   },
   {
     timestamps: true,
@@ -71,6 +75,10 @@ packageSchema.virtual('durationDays').get(function durationDays() {
 /** A package whose departure has passed can no longer be published or requested. */
 packageSchema.virtual('isExpired').get(function isExpired() {
   return Boolean(this.departureDate) && this.departureDate <= new Date();
+});
+
+packageSchema.virtual('isFeatured').get(function isFeatured() {
+  return Boolean(this.featuredUntil) && this.featuredUntil > new Date();
 });
 
 packageSchema.index({ agencyId: 1, createdAt: -1 });

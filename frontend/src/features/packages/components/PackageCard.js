@@ -49,9 +49,12 @@ export function PackageCover({ pkg, sizes = '(min-width: 1200px) 400px, (min-wid
   return (
     <div className={`${styles.cover} ${pkg.coverImage ? '' : styles.coverEmpty}`}>
       {pkg.coverImage && <CloudImage src={pkg.coverImage.url} alt="" fill sizes={sizes} className={styles.coverImg} />}
-      <span className={styles.city}>
-        <Icon name="plane" size={13} /> From {pkg.departureCity}
-      </span>
+      <div className={styles.coverTags}>
+        {pkg.isFeatured && <FeaturedBadge />}
+        <span className={styles.city}>
+          <Icon name="plane" size={13} /> From {pkg.departureCity}
+        </span>
+      </div>
       <span className={styles.duration}>{pkg.durationDays} days</span>
       {showAgency && pkg.agency && (
         <div className={styles.coverAgency}>
@@ -60,6 +63,15 @@ export function PackageCover({ pkg, sizes = '(min-width: 1200px) 400px, (min-wid
         </div>
       )}
     </div>
+  );
+}
+
+/** Label on packages an agency has paid to feature at the top of search results. */
+export function FeaturedBadge({ className = '' }) {
+  return (
+    <span className={`${styles.featured} ${className}`}>
+      <Icon name="star" size={12} strokeWidth={2.2} /> Featured
+    </span>
   );
 }
 
@@ -82,7 +94,7 @@ function HotelRow({ city, hotel }) {
  */
 export default function PackageCard({ pkg, showAgency = true, titleAs: Title = 'h2' }) {
   return (
-    <div className={`card ${styles.card}`}>
+    <div className={`card ${styles.card} ${pkg.isFeatured ? styles.cardFeatured : ''}`}>
       <PackageCover pkg={pkg} showAgency={showAgency} />
       <div className={`card-body ${styles.body} d-flex flex-column`}>
         <Title className={`${styles.title} mb-1`}>

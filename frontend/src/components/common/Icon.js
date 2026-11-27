@@ -27,6 +27,7 @@ const PATHS = {
   mosque: 'M4 21V11m16 10V11M2 21h20M7 21v-6a5 5 0 0 1 10 0v6M12 6a3 3 0 0 0-3 3h6a3 3 0 0 0-3-3Zm0-3v3M4 11V7m16 4V7',
   filter: 'M4 6h16M7 12h10M10 18h4',
   plus: 'M12 5v14M5 12h14',
+  star: 'm12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3l-5.5 2.9 1-6.2L3 9.6l6.2-.9L12 3Z',
 };
 
 /** Inline stroke icon. `size` is in pixels; the icon is decorative unless `title` is given. */

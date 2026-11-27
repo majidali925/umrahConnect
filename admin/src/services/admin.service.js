@@ -22,6 +22,13 @@ export const adminService = {
       .get(`/admin/agencies/${id}/documents/${documentId}/file`, { responseType: 'blob' })
       .then((res) => res.data),
 
+  listFeatureRequests: (params) => unwrap(apiClient.get('/admin/feature-requests', { params: clean(params) })),
+  getFeaturePaymentProofBlob: (id) =>
+    apiClient.get(`/admin/feature-requests/${id}/payment-proof`, { responseType: 'blob' }).then((res) => res.data),
+  approveFeature: (id, note) => unwrap(apiClient.patch(`/admin/feature-requests/${id}/approve`, note ? { note } : {})),
+  rejectFeature: (id, reason) => unwrap(apiClient.patch(`/admin/feature-requests/${id}/reject`, { reason })),
+  endFeature: (id, reason) => unwrap(apiClient.patch(`/admin/feature-requests/${id}/end`, { reason })),
+
   listUsers: (params) => unwrap(apiClient.get('/admin/users', { params: clean(params) })),
   listAuditLogs: (params) => unwrap(apiClient.get('/admin/audit-logs', { params: clean(params) })),
 };

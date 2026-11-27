@@ -8,4 +8,5 @@ module.exports = {
   Package: require('./Package'),
   Quotation: require('./Quotation'),
   Review: require('./Review'),
+  FeatureRequest: require('./FeatureRequest'),
 };

@@ -74,4 +74,20 @@ export const AUDIT_ACTION_LABELS = {
   QUOTATION_CONFIRMED: 'Booking confirmed',
   QUOTATION_DECLINED: 'Seat request declined',
   QUOTATION_CANCELLED: 'Seat request cancelled',
+  REVIEW_SUBMITTED: 'Review submitted',
+  REVIEW_UPDATED: 'Review updated',
+  FEATURE_REQUESTED: 'Feature requested',
+  FEATURE_REQUEST_WITHDRAWN: 'Feature request withdrawn',
+  FEATURE_APPROVED: 'Featuring approved',
+  FEATURE_REJECTED: 'Feature request rejected',
+  FEATURE_ENDED: 'Featuring ended early',
+};
+
+/** Feature requests: ACTIVE and ENDED are approved requests before and after their end time. */
+export const FEATURE_STATE_META = {
+  PENDING: { label: 'Awaiting approval', color: 'warning' },
+  ACTIVE: { label: 'Featured now', color: 'success' },
+  ENDED: { label: 'Ended', color: 'secondary' },
+  REJECTED: { label: 'Rejected', color: 'danger' },
+  CANCELLED: { label: 'Withdrawn', color: 'dark' },
 };

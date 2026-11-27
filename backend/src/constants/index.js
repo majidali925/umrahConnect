@@ -131,6 +131,11 @@ const AUDIT_ACTIONS = Object.freeze({
   QUOTATION_CANCELLED: 'QUOTATION_CANCELLED',
   REVIEW_SUBMITTED: 'REVIEW_SUBMITTED',
   REVIEW_UPDATED: 'REVIEW_UPDATED',
+  FEATURE_REQUESTED: 'FEATURE_REQUESTED',
+  FEATURE_REQUEST_WITHDRAWN: 'FEATURE_REQUEST_WITHDRAWN',
+  FEATURE_APPROVED: 'FEATURE_APPROVED',
+  FEATURE_REJECTED: 'FEATURE_REJECTED',
+  FEATURE_ENDED: 'FEATURE_ENDED',
 });
 
 const ENTITY_TYPES = Object.freeze({
@@ -141,6 +146,7 @@ const ENTITY_TYPES = Object.freeze({
   PACKAGE: 'Package',
   QUOTATION: 'Quotation',
   REVIEW: 'Review',
+  FEATURE_REQUEST: 'FeatureRequest',
 });
 
 const PACKAGE_STATUS = Object.freeze({
@@ -176,6 +182,27 @@ const QUOTATION_STATUS = Object.freeze({
   DECLINED: 'DECLINED', // agency turned the request down
   CANCELLED: 'CANCELLED', // withdrawn by the customer, or a confirmed booking cancelled by the agency
 });
+
+/**
+ * An agency's request to feature (pin to the top of search results) one of its packages.
+ * Approval by an admin starts the featured period; ACTIVE/ENDED are derived from `endsAt`.
+ */
+const FEATURE_REQUEST_STATUS = Object.freeze({
+  PENDING: 'PENDING', // awaiting an admin
+  APPROVED: 'APPROVED', // featured from startsAt until endsAt
+  REJECTED: 'REJECTED', // turned down by an admin
+  CANCELLED: 'CANCELLED', // withdrawn by the agency, or the package was deleted
+});
+
+// What an approved request looks like now: ACTIVE while featured, ENDED afterwards.
+const FEATURE_REQUEST_STATES = ['PENDING', 'ACTIVE', 'ENDED', 'REJECTED', 'CANCELLED'];
+
+/**
+ * Featuring is one fixed offer: FEATURE_DAYS days for FEATURE_PRICE whole PKR. Payment is made
+ * outside the app; the agency may attach proof of payment to get its request approved sooner.
+ */
+const FEATURE_DAYS = 7;
+const FEATURE_PRICE = 300;
 
 const PAKISTAN_PROVINCES = [
   'Punjab',
@@ -213,4 +240,8 @@ module.exports = {
   ROOM_TYPES,
   PACKAGE_INCLUSIONS,
   QUOTATION_STATUS,
+  FEATURE_REQUEST_STATUS,
+  FEATURE_REQUEST_STATES,
+  FEATURE_DAYS,
+  FEATURE_PRICE,
 };

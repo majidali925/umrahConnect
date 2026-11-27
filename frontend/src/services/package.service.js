@@ -16,6 +16,16 @@ export const agencyPackageService = {
   /** Cover photo shown behind the package on cards and its page. */
   uploadCoverImage: (id, file, onProgress) => uploadImage(`/agencies/packages/${id}/cover-image`, file, onProgress),
   removeCoverImage: (id) => unwrap(apiClient.delete(`/agencies/packages/${id}/cover-image`)),
+  /** Featuring: the pre-filled application ({ application, days, price, daysUntilDeparture }). */
+  featureApplication: (id) => unwrap(apiClient.get(`/agencies/packages/${id}/feature`)),
+  /** Sends the application, with an optional proof of payment (PDF/JPG/PNG) to be reviewed first. */
+  requestFeature: (id, { note, paymentProof }) => {
+    const form = new FormData();
+    if (note) form.append('note', note);
+    if (paymentProof) form.append('paymentProof', paymentProof);
+    return unwrap(apiClient.post(`/agencies/packages/${id}/feature`, form));
+  },
+  withdrawFeature: (id) => unwrap(apiClient.delete(`/agencies/packages/${id}/feature`)),
   /** Hotels near the Haram of 'MAKKAH' or 'MADINAH', each with its distanceMeters from the mosque. */
   searchHotels: (city, q) => unwrap(apiClient.get('/agencies/hotels/search', { params: { city, q } })),
 

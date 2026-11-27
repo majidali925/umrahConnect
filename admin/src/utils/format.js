@@ -16,6 +16,12 @@ export function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Whole Pakistani rupees, e.g. "PKR 2,500". */
+export function formatCurrency(value) {
+  if (value === null || value === undefined) return '—';
+  return `PKR ${Number(value).toLocaleString('en-PK')}`;
+}
+
 /** Displays +923001234567 as 0300 1234567. */
 export function formatPhone(phone) {
   if (!phone) return '—';

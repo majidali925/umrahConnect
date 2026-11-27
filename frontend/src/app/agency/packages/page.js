@@ -9,6 +9,8 @@ import Pagination from '@/components/common/Pagination';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import { LoadingState, ErrorState, EmptyState } from '@/components/common/States';
 import AgencyStatusGate from '@/features/agency/components/AgencyStatusGate';
+import FeatureRequestModal from '@/features/packages/components/FeatureRequestModal';
+import Icon from '@/components/common/Icon';
 import { agencyPackageService } from '@/services/package.service';
 import { useFetch } from '@/hooks/useFetch';
 import { useUrlParams, useUrlSearch } from '@/hooks/useUrlParams';
@@ -45,7 +47,43 @@ const ACTIONS = {
     confirmColor: 'danger',
     run: (p) => agencyPackageService.remove(p._id),
   },
+  withdrawFeature: {
+    title: 'Withdraw feature application',
+    message: 'Your application to feature this package will be cancelled. You can send a new one at any time.',
+    confirmLabel: 'Withdraw application',
+    run: (p) => agencyPackageService.withdrawFeature(p._id),
+  },
 };
+
+const canFeature = (p) =>
+  p.status === 'PUBLISHED' && !p.isExpired && !p.isFeatured && p.featureRequest?.state !== 'PENDING';
+
+/** Featuring state under the package status: featured, waiting for approval, or not approved. */
+function FeatureStatus({ pkg }) {
+  const request = pkg.featureRequest;
+  if (pkg.isFeatured) {
+    return (
+      <div className="small mt-1 text-nowrap fw-semibold text-warning-emphasis">
+        <Icon name="star" size={13} strokeWidth={2.2} /> Featured until {formatDate(pkg.featuredUntil, true)}
+      </div>
+    );
+  }
+  if (request?.state === 'PENDING') {
+    return (
+      <div className="small mt-1 text-secondary">
+        Feature application sent{request.hasPaymentProof ? ' · payment attached' : ''}
+      </div>
+    );
+  }
+  if (request?.state === 'REJECTED') {
+    return (
+      <div className="small mt-1 text-danger" style={{ maxWidth: '14rem' }}>
+        Feature request not approved{request.decisionNote ? `: ${request.decisionNote}` : ''}
+      </div>
+    );
+  }
+  return null;
+}
 
 function PackageList() {
   const { get, page, setParams } = useUrlParams();
@@ -53,6 +91,7 @@ function PackageList() {
   const search = get('search');
   const [searchInput, setSearchInput, searchPending] = useUrlSearch('search', { delay: 500 });
   const [pending, setPending] = useState(null); // { action, pkg }
+  const [featuring, setFeaturing] = useState(null); // package being featured
   const [notice, setNotice] = useState(null);
 
   const { data, meta, loading, error, reload } = useFetch(
@@ -184,6 +223,7 @@ function PackageList() {
                       </td>
                       <td data-label="Status">
                         <StatusBadge type="package" status={packageStatus(p)} />
+                        <FeatureStatus pkg={p} />
                       </td>
                       <td className="text-end text-nowrap cell-actions">
                         <Link href={`/agency/packages/${p._id}/edit`} className="btn btn-sm btn-light border me-1">
@@ -199,6 +239,21 @@ function PackageList() {
                               Publish
                             </Button>
                           )
+                        )}
+                        {canFeature(p) && (
+                          <Button size="sm" color="warning" outline className="me-1" onClick={() => setFeaturing(p)}>
+                            <Icon name="star" size={13} strokeWidth={2.2} /> Feature
+                          </Button>
+                        )}
+                        {p.featureRequest?.state === 'PENDING' && (
+                          <Button
+                            size="sm"
+                            color="light"
+                            className="border me-1"
+                            onClick={() => setPending({ action: 'withdrawFeature', pkg: p })}
+                          >
+                            Withdraw application
+                          </Button>
                         )}
                         <Button size="sm" color="danger" outline onClick={() => setPending({ action: 'delete', pkg: p })}>
                           Delete
@@ -238,6 +293,17 @@ function PackageList() {
         }}
         onClose={() => setPending(null)}
       />
+
+      {featuring && (
+        <FeatureRequestModal
+          pkg={featuring}
+          onClose={() => setFeaturing(null)}
+          onSent={async (message) => {
+            setNotice(message);
+            await reload();
+          }}
+        />
+      )}
     </>
   );
 }

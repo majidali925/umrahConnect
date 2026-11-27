@@ -6,8 +6,10 @@ const { loadMyAgency, requireEditableAgency, requireApprovedAgency } = require('
 const { documentUpload, imageUpload, verifyFileSignature, requireFile } = require('../middlewares/upload');
 const vendorController = require('../controllers/vendor.controller');
 const packageController = require('../controllers/package.controller');
+const featuredController = require('../controllers/featured.controller');
 const schemas = require('../validators/agency.validator');
 const packageSchemas = require('../validators/package.validator');
+const featuredSchemas = require('../validators/featured.validator');
 const { hotelSearchLimiter } = require('../middlewares/rateLimiter');
 const { ROLES } = require('../constants');
 
@@ -67,6 +69,21 @@ router.patch(
 router.delete('/packages/:packageId', approved, byPackage, packageController.remove);
 router.put('/packages/:packageId/cover-image', approved, byPackage, photoUpload, vendorController.setCoverImage);
 router.delete('/packages/:packageId/cover-image', approved, byPackage, vendorController.removeCoverImage);
+
+// Featuring: apply to have a published package pinned to the top of search results for 7 days.
+// The application is filled in from the agency and package; proof of payment is optional
+// (multipart field "paymentProof": PDF/JPG/PNG) and gets the request reviewed first.
+router.get('/packages/:packageId/feature', approved, byPackage, featuredController.preview);
+router.post(
+  '/packages/:packageId/feature',
+  approved,
+  byPackage,
+  documentUpload.single('paymentProof'),
+  verifyFileSignature,
+  validate(featuredSchemas.requestFeature),
+  featuredController.request,
+);
+router.delete('/packages/:packageId/feature', approved, byPackage, featuredController.withdraw);
 
 router.get('/quotations', approved, validate(packageSchemas.listQuotations, 'query'), packageController.listAgencyQuotations);
 router.patch(
