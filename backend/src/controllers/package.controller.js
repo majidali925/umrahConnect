@@ -72,6 +72,12 @@ async function departureCities(_req, res) {
   sendSuccess(res, { data: await packageService.listDepartureCities() });
 }
 
+/** { total, cities: [{ city, count }] } for the home page's city chips, in one request. */
+async function departureCityCounts(_req, res) {
+  const cities = await packageService.departureCityCounts();
+  sendSuccess(res, { data: { total: cities.reduce((sum, c) => sum + c.count, 0), cities } });
+}
+
 async function getPublic(req, res) {
   sendSuccess(res, { data: await packageService.getPublicPackage(req.params.packageId) });
 }
@@ -107,6 +113,7 @@ module.exports = {
   cancelBooking,
   browse,
   departureCities,
+  departureCityCounts,
   getPublic,
   requestQuotation,
   listMyQuotations,

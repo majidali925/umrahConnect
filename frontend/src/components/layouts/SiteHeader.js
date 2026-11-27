@@ -69,9 +69,12 @@ export default function SiteHeader() {
                 <IntentLink className="nav-link d-inline-flex align-items-center gap-2" href="/packages/compare" onClick={close}>
                   Compare
                   {compareItems.length > 0 && (
-                    <span className={styles.count} aria-label={`${compareItems.length} selected`}>
-                      {compareItems.length}
-                    </span>
+                    <>
+                      <span className={styles.count} aria-hidden="true">
+                        {compareItems.length}
+                      </span>
+                      <span className="visually-hidden">, {compareItems.length} selected</span>
+                    </>
                   )}
                 </IntentLink>
               </li>

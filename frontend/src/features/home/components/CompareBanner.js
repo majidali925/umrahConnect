@@ -23,7 +23,11 @@ export default function CompareBanner() {
         </p>
       </div>
       <div className="d-flex align-items-center gap-3 flex-shrink-0">
-        <div className={styles.slots} aria-label={`${items.length} of ${MAX_COMPARE} packages picked`}>
+        <div
+          className={styles.slots}
+          role="img"
+          aria-label={`${items.length} of ${MAX_COMPARE} packages picked`}
+        >
           {Array.from({ length: MAX_COMPARE }, (_, i) => (
             <span key={i} className={i < items.length ? styles.slotFilled : styles.slot}>
               {i < items.length ? i + 1 : <Icon name="plus" size={12} />}

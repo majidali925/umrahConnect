@@ -69,12 +69,6 @@ export async function listDepartureCities() {
  */
 export async function departureCityCounts() {
   cacheLife('minutes');
-  const total = async (params) => (await getJson(`/packages?${query({ ...params, limit: 1 })}`))?.meta?.total ?? 0;
-  const names = (await getJson('/packages/departure-cities'))?.data ?? [];
-  const [all, ...counts] = await Promise.all([total({}), ...names.map((city) => total({ departureCity: city }))]);
-  const cities = names
-    .map((city, i) => ({ city, count: counts[i] }))
-    .filter((c) => c.count > 0)
-    .sort((a, b) => b.count - a.count || a.city.localeCompare(b.city));
-  return { total: all, cities };
+  const body = await getJson('/packages/departure-cities/counts');
+  return { total: body?.data?.total ?? 0, cities: body?.data?.cities ?? [] };
 }

@@ -67,7 +67,7 @@ export default function PackageBrowser({ initial }) {
                 <Input
                   id="pkg-search"
                   type="search"
-                  placeholder="Package, hotel or city…"
+                  placeholder="Package, hotel, agency or city…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
