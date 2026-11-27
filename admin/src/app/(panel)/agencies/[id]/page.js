@@ -42,22 +42,42 @@ const ACTIONS = {
     run: (id, reason) => adminService.reject(id, reason),
   },
   suspend: {
-    title: 'Suspend vendor',
-    message: 'Suspended vendors immediately lose access to publishing features.',
-    confirmLabel: 'Suspend vendor',
+    title: 'Disable vendor',
+    message: ({ packageStats: s }) => (
+      <ul className="ps-3 mb-0">
+        <li>
+          Their public page and all their packages are hidden from customers right away
+          {s.listed > 0 && <strong> ({plural(s.listed, 'live package')})</strong>}.
+        </li>
+        <li>
+          {s.pendingRequests > 0 ? (
+            <strong>{plural(s.pendingRequests, 'pending seat request')} will be cancelled.</strong>
+          ) : (
+            'Any pending seat requests are cancelled.'
+          )}{' '}
+          Customers are not emailed. Confirmed bookings are kept.
+        </li>
+        <li>The vendor can no longer manage packages or seat requests, and is emailed the reason below.</li>
+        <li>Nothing is deleted. Enabling the vendor again makes their packages visible again.</li>
+      </ul>
+    ),
+    confirmLabel: 'Disable vendor',
     confirmColor: 'dark',
     requireReason: true,
-    reasonLabel: 'Suspension reason (shared with the vendor)',
+    reasonLabel: 'Reason (shared with the vendor)',
     run: (id, reason) => adminService.suspend(id, reason),
   },
   reinstate: {
-    title: 'Reinstate vendor',
-    message: 'Restore this vendor to approved status and re-enable publishing access.',
-    confirmLabel: 'Reinstate',
+    title: 'Enable vendor',
+    message: ({ packageStats: s }) =>
+      `Restore this vendor to approved status. Their published, upcoming packages${s.listed > 0 ? ` (${s.listed})` : ''} become visible to customers again. Seat requests cancelled when they were disabled are not restored.`,
+    confirmLabel: 'Enable vendor',
     confirmColor: 'success',
     run: (id) => adminService.reinstate(id),
   },
 };
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 function AgencyDetail() {
   const { id } = useParams();
@@ -68,8 +88,10 @@ function AgencyDetail() {
   if (loading && !data) return <LoadingState label="Loading application…" />;
   if (error && !data) return <ErrorState message={error} onRetry={reload} />;
 
-  const { agency, user, documentRequirements, verificationSummary, auditLogs, actions, approvedBy, missingRequirements } = data;
+  const { agency, user, documentRequirements, verificationSummary, auditLogs, actions, approvedBy, missingRequirements, packageStats } =
+    data;
   const current = action ? ACTIONS[action] : null;
+  const isDisabled = agency.verificationStatus === 'SUSPENDED';
   const unapprovedRequired = documentRequirements.filter((r) => r.required && r.document?.verificationStatus !== 'APPROVED');
 
   const runAction = async (reason) => {
@@ -108,12 +130,12 @@ function AgencyDetail() {
             )}
             {actions.canSuspend && (
               <Button color="dark" outline onClick={() => setAction('suspend')}>
-                Suspend
+                Disable
               </Button>
             )}
             {actions.canReinstate && (
               <Button color="success" onClick={() => setAction('reinstate')}>
-                Reinstate
+                Enable
               </Button>
             )}
           </>
@@ -142,9 +164,15 @@ function AgencyDetail() {
           <strong>Rejection reason:</strong> {agency.rejectionReason}
         </Alert>
       )}
-      {agency.verificationStatus === 'SUSPENDED' && agency.suspensionReason && (
+      {isDisabled && (
         <Alert color="dark" fade={false}>
-          <strong>Suspension reason:</strong> {agency.suspensionReason}
+          This vendor is disabled: their page and packages are hidden from customers.
+          {agency.suspensionReason && (
+            <>
+              <br />
+              <strong>Reason:</strong> {agency.suspensionReason}
+            </>
+          )}
         </Alert>
       )}
 
@@ -187,6 +215,29 @@ function AgencyDetail() {
             </CardBody>
           </Card>
 
+          {(packageStats.total > 0 || agency.verificationStatus === 'APPROVED' || isDisabled) && (
+            <Card className="mb-4">
+              <CardBody className="p-4">
+                <h2 className="h6 section-title mb-3">Packages</h2>
+                <DetailList
+                  items={[
+                    {
+                      label: isDisabled ? 'Published (hidden)' : 'Live for customers',
+                      value: String(packageStats.listed),
+                    },
+                    { label: 'All packages', value: String(packageStats.total) },
+                    { label: 'Pending seat requests', value: String(packageStats.pendingRequests) },
+                  ]}
+                />
+                {isDisabled && packageStats.listed > 0 && (
+                  <p className="small text-secondary mt-3 mb-0">
+                    These packages become visible again when the vendor is enabled.
+                  </p>
+                )}
+              </CardBody>
+            </Card>
+          )}
+
           <Card className="mb-4">
             <CardBody className="p-4">
               <h2 className="h6 section-title mb-3">Timeline</h2>
@@ -197,7 +248,7 @@ function AgencyDetail() {
                   { label: 'Review started', value: formatDate(agency.reviewStartedAt, true), hidden: !agency.reviewStartedAt },
                   { label: 'Approved', value: formatDate(agency.approvedAt, true), hidden: !agency.approvedAt },
                   { label: 'Approved by', value: approvedBy?.fullName, hidden: !approvedBy },
-                  { label: 'Suspended', value: formatDate(agency.suspendedAt, true), hidden: !agency.suspendedAt },
+                  { label: 'Disabled', value: formatDate(agency.suspendedAt, true), hidden: !agency.suspendedAt },
                 ]}
               />
             </CardBody>
@@ -234,7 +285,7 @@ function AgencyDetail() {
         <ConfirmModal
           isOpen
           title={current.title}
-          message={current.message}
+          message={typeof current.message === 'function' ? current.message(data) : current.message}
           confirmLabel={current.confirmLabel}
           confirmColor={current.confirmColor}
           requireReason={current.requireReason}

@@ -32,7 +32,12 @@ async function approvedVendor() {
         businessName: 'Al-Noor Travels',
         email: 'info@alnoor.example.com',
         phone: '+923211234567',
+        whatsapp: '+923211234567',
+        description: 'Family-run Umrah travel agency.',
+        experience: 10,
+        province: 'Punjab',
         city: 'Lahore',
+        address: '12 Main Boulevard, Gulberg III',
       },
     },
   );
@@ -358,6 +363,40 @@ describe('Packages and seat requests', () => {
         .patch(`/api/v1/quotations/${created[0].body.data._id}/cancel`)
         .set(auth(customer2.token));
       assert.equal(withdraw.status, 200);
+    });
+
+    it('cancels pending requests without emailing customers when the admin suspends the agency', async () => {
+      const admin = await h.createAdmin();
+      const pending = await h
+        .api()
+        .post(`/api/v1/packages/${packageId}/quotations`)
+        .set(auth(customer2.token))
+        .send({ seats: 1 });
+      assert.equal(pending.status, 201);
+
+      const agencyId = (await Agency.findOne({ userId: vendor.session.user.id }))._id.toString();
+      const emailsBefore = h.outbox.length;
+      const suspend = await h
+        .api()
+        .patch(`/api/v1/admin/agencies/${agencyId}/suspend`)
+        .set(auth(admin.token))
+        .send({ reason: 'Customer complaints under investigation.' });
+      assert.equal(suspend.status, 200);
+
+      const mine = await h.api().get('/api/v1/quotations').set(auth(customer2.token));
+      const cancelled = mine.body.data.find((q) => q._id === pending.body.data._id);
+      assert.equal(cancelled.status, 'CANCELLED');
+      assert.equal(cancelled.cancelledBy, 'PLATFORM');
+      assert.ok(!h.outbox.slice(emailsBefore).some((m) => m.to === customer2.payload.email));
+
+      // The admin sees what disabling hid: the package stays published, nothing is pending.
+      assert.deepEqual(suspend.body.data.packageStats, { total: 1, listed: 1, pendingRequests: 0 });
+
+      const log = suspend.body.data.auditLogs.find((l) => l.action === 'AGENCY_SUSPENDED');
+      assert.equal(log.metadata.cancelledRequests, 1);
+
+      const reinstate = await h.api().patch(`/api/v1/admin/agencies/${agencyId}/reinstate`).set(auth(admin.token));
+      assert.equal(reinstate.status, 200);
     });
 
     it('deletes a package once nothing is pending or confirmed', async () => {

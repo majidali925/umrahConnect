@@ -20,7 +20,8 @@ const quotationSchema = new mongoose.Schema(
 
     status: { type: String, enum: Object.values(QUOTATION_STATUS), default: QUOTATION_STATUS.PENDING, required: true },
     agencyNote: { type: String, trim: true, maxlength: 1000 },
-    cancelledBy: { type: String, enum: ['CUSTOMER', 'AGENCY'] },
+    // PLATFORM: cancelled automatically because an admin suspended the agency.
+    cancelledBy: { type: String, enum: ['CUSTOMER', 'AGENCY', 'PLATFORM'] },
     respondedAt: { type: Date },
   },
   {

@@ -32,12 +32,12 @@ async function reject(req, res) {
 
 async function suspend(req, res) {
   const data = await adminService.suspendAgency(req.params.id, req.admin, req.body);
-  sendSuccess(res, { message: 'Vendor suspended', data });
+  sendSuccess(res, { message: 'Vendor disabled. Their packages are hidden from customers.', data });
 }
 
 async function reinstate(req, res) {
   const data = await adminService.reinstateAgency(req.params.id, req.admin);
-  sendSuccess(res, { message: 'Vendor reinstated', data });
+  sendSuccess(res, { message: 'Vendor enabled. Their published packages are visible again.', data });
 }
 
 async function reviewDocument(req, res) {

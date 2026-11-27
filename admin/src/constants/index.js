@@ -24,7 +24,7 @@ export const AGENCY_STATUS_META = {
   UNDER_REVIEW: { label: 'Under review', color: 'info' },
   APPROVED: { label: 'Approved', color: 'success' },
   REJECTED: { label: 'Rejected', color: 'danger' },
-  SUSPENDED: { label: 'Suspended', color: 'dark' },
+  SUSPENDED: { label: 'Disabled', color: 'dark' },
 };
 
 export const DOCUMENT_STATUS_META = {
@@ -56,8 +56,8 @@ export const AUDIT_ACTION_LABELS = {
   AGENCY_REVIEW_STARTED: 'Review started',
   AGENCY_APPROVED: 'Application approved',
   AGENCY_REJECTED: 'Application rejected',
-  AGENCY_SUSPENDED: 'Vendor suspended',
-  AGENCY_REINSTATED: 'Vendor reinstated',
+  AGENCY_SUSPENDED: 'Vendor disabled',
+  AGENCY_REINSTATED: 'Vendor enabled',
   DOCUMENT_UPLOADED: 'Document uploaded',
   DOCUMENT_DELETED: 'Document deleted',
   DOCUMENT_APPROVED: 'Document approved',

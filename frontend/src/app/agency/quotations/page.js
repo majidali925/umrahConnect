@@ -17,6 +17,11 @@ import { formatCurrency, formatDate, formatDateRange, formatPhone } from '@/util
 
 const TABS = ['PENDING', 'CONFIRMED', 'DECLINED', 'CANCELLED'];
 
+const CANCELLED_BY = {
+  AGENCY: 'Cancelled by you',
+  PLATFORM: 'Cancelled automatically when your account was suspended',
+};
+
 const ACTIONS = {
   confirm: {
     title: 'Confirm booking',
@@ -97,7 +102,7 @@ function QuotationCard({ q, onAction }) {
             )}
             {q.status === 'CANCELLED' && (
               <div className="text-secondary mt-2">
-                Cancelled by {q.cancelledBy === 'AGENCY' ? 'you' : 'the customer'} on {formatDate(q.respondedAt)}
+                {CANCELLED_BY[q.cancelledBy] || 'Cancelled by the customer'} on {formatDate(q.respondedAt)}
               </div>
             )}
           </div>

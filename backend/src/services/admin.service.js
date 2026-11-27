@@ -1,4 +1,4 @@
-const { Agency, AgencyDocument, User, Admin, AuditLog } = require('../models');
+const { Agency, AgencyDocument, User, Admin, AuditLog, Package, Quotation } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, buildMeta, escapeRegex } = require('../utils/pagination');
 const audit = require('./audit.service');
@@ -11,6 +11,8 @@ const {
   DOCUMENT_REQUIREMENTS,
   DOCUMENT_TYPES,
   VENDOR_TYPES,
+  PACKAGE_STATUS,
+  QUOTATION_STATUS,
   AUDIT_ACTIONS,
   ENTITY_TYPES,
 } = require('../constants');
@@ -83,12 +85,16 @@ async function findAgency(id) {
 
 async function getAgencyDetail(id) {
   const agency = await findAgency(id);
-  const [user, documents, approvedBy] = await Promise.all([
+  const [user, documents, approvedBy, totalPackages, listedPackages, pendingRequests] = await Promise.all([
     User.findById(agency.userId).select(USER_SUMMARY),
     AgencyDocument.find({ agencyId: agency._id })
       .sort({ createdAt: 1 })
       .populate('reviewedBy', 'fullName'),
     agency.approvedBy ? Admin.findById(agency.approvedBy).select('fullName') : null,
+    Package.countDocuments({ agencyId: agency._id }),
+    // Published and not yet departed: what customers see while the agency is approved.
+    Package.countDocuments({ agencyId: agency._id, status: PACKAGE_STATUS.PUBLISHED, departureDate: { $gt: new Date() } }),
+    Quotation.countDocuments({ agencyId: agency._id, status: QUOTATION_STATUS.PENDING }),
   ]);
 
   const auditLogs = await AuditLog.find({
@@ -107,6 +113,7 @@ async function getAgencyDetail(id) {
     user,
     approvedBy,
     auditLogs,
+    packageStats: { total: totalPackages, listed: listedPackages, pendingRequests },
     actions: {
       canStartReview: agency.verificationStatus === AGENCY_STATUS.PENDING,
       canApprove: REVIEWABLE.includes(agency.verificationStatus),
@@ -155,8 +162,21 @@ async function assertRequiredDocumentsApproved(agency) {
 }
 
 /**
+ * A suspended agency can no longer answer seat requests, so its pending ones are cancelled
+ * (customers are not emailed). Confirmed bookings are left untouched.
+ */
+async function cancelPendingQuotations(agency) {
+  const { modifiedCount } = await Quotation.updateMany(
+    { agencyId: agency._id, status: QUOTATION_STATUS.PENDING },
+    { $set: { status: QUOTATION_STATUS.CANCELLED, cancelledBy: 'PLATFORM', respondedAt: new Date() } },
+  );
+  return { cancelledRequests: modifiedCount };
+}
+
+/**
  * Agency status transitions. Each one: allowed source statuses, the fields to set, the audit
  * action, and the email sent to the owner. `reason`/`note` come from the validated request body.
+ * `after` runs once the new status is saved and returns extra audit metadata.
  */
 const TRANSITIONS = {
   startReview: {
@@ -189,7 +209,7 @@ const TRANSITIONS = {
   },
   suspend: {
     from: [AGENCY_STATUS.APPROVED],
-    verb: 'suspend',
+    verb: 'disable',
     action: AUDIT_ACTIONS.AGENCY_SUSPENDED,
     set: (_admin, { reason }) => ({
       verificationStatus: AGENCY_STATUS.SUSPENDED,
@@ -197,11 +217,12 @@ const TRANSITIONS = {
       suspendedAt: new Date(),
     }),
     metadata: ({ reason }) => ({ reason }),
+    after: cancelPendingQuotations,
     email: 'agencySuspended',
   },
   reinstate: {
     from: [AGENCY_STATUS.SUSPENDED],
-    verb: 'reinstate',
+    verb: 'enable',
     action: AUDIT_ACTIONS.AGENCY_REINSTATED,
     set: () => ({ verificationStatus: AGENCY_STATUS.APPROVED, suspensionReason: undefined, suspendedAt: undefined }),
     email: 'agencyReinstated',
@@ -218,7 +239,8 @@ async function transitionAgency(name, id, admin, body = {}) {
   await agency.save();
 
   const metadata = t.metadata?.(body);
-  await recordAdminAction(admin, t.action, ENTITY_TYPES.AGENCY, agency._id, metadata);
+  const extra = t.after ? await t.after(agency) : null;
+  await recordAdminAction(admin, t.action, ENTITY_TYPES.AGENCY, agency._id, extra ? { ...metadata, ...extra } : metadata);
   if (t.email) await notifyOwner(agency, t.email, metadata);
   return getAgencyDetail(id);
 }

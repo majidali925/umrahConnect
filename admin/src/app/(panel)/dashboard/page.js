@@ -41,7 +41,7 @@ export default function AdminDashboardPage() {
           <StatCard label="Awaiting review" value={agencies.awaitingReview} hint="Pending + under review" accent />
           </Col>
         <Col xs={6} lg={3}>
-          <StatCard label="Approved vendors" value={agencies.byStatus.APPROVED} hint={`${agencies.byStatus.SUSPENDED} suspended`} />
+          <StatCard label="Approved vendors" value={agencies.byStatus.APPROVED} hint={`${agencies.byStatus.SUSPENDED} disabled`} />
         </Col>
         <Col xs={6} lg={3}>
           <StatCard label="Total vendors" value={agencies.total} hint={`${agencies.byStatus.DRAFT} still in draft`} />

@@ -10,6 +10,9 @@ function describeMeta(log) {
   if (meta.isResubmission) parts.push('resubmission');
   if (meta.fields?.length) parts.push(`fields: ${meta.fields.join(', ')}`);
   if (meta.role) parts.push(meta.role.toLowerCase());
+  if (meta.cancelledRequests) {
+    parts.push(`${meta.cancelledRequests} pending seat request${meta.cancelledRequests === 1 ? '' : 's'} cancelled`);
+  }
   return parts.join(' · ');
 }
 

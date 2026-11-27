@@ -15,6 +15,11 @@ import { useFetch } from '@/hooks/useFetch';
 import { ROOM_TYPE_LABELS } from '@/constants';
 import { formatCurrency, formatDate, formatDateRange, formatPhone } from '@/utils/format';
 
+const CANCELLED_BY = {
+  AGENCY: 'Cancelled by the agency',
+  PLATFORM: 'Cancelled because the agency is no longer available on UmrahConnect',
+};
+
 const STATUS_HELP = {
   PENDING: 'Waiting for the agency to confirm. No seats are reserved yet.',
   CONFIRMED: 'Your seats are reserved. The agency will contact you to arrange the next steps and payment.',
@@ -130,7 +135,7 @@ export default function MyQuotationsPage() {
                 {STATUS_HELP[q.status] && <p className="small text-secondary mt-3 mb-0">{STATUS_HELP[q.status]}</p>}
                 {q.status === 'CANCELLED' && (
                   <p className="small text-secondary mt-3 mb-0">
-                    {q.cancelledBy === 'AGENCY' ? 'Cancelled by the agency' : 'You withdrew this request'} on{' '}
+                    {CANCELLED_BY[q.cancelledBy] || 'You withdrew this request'} on{' '}
                     {formatDate(q.respondedAt)}.
                   </p>
                 )}
