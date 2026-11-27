@@ -7,7 +7,7 @@ import { formatCurrency, formatDateRange, formatDistance } from '@/utils/format'
 import styles from './PackageCard.module.scss';
 
 export const Stars = ({ count }) => (
-  <span className={styles.stars} aria-label={`${count} star hotel`}>
+  <span className={styles.stars} role="img" aria-label={`${count} star hotel`}>
     {'★'.repeat(count)}
   </span>
 );
